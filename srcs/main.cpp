@@ -3,10 +3,11 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 16:28:11 by lduthill          #+#    #+#             */
 /*   Updated: 2024/02/13 18:02:38 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/13 23:15:44 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +15,8 @@
 
 int	main(int ac, char **av)
 {
-	std::string args; 
- 
+	std::string args;
+
 	if (ac != 3)
 		return (printf("Error\n please follow this instructions\n ./ircserv <port> <password>.\n"), 1);
 	args = av[1];
