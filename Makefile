@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-# FT_IRC # Internet relay conversation between a client and server
-=======
 # FT_IRC # Internet relay chat between a client and server
 
->>>>>>> 0ed8ce7718678b35bae4b7127c8edd113c6acc0b
 NAME = ircserv
 FLAGS = -Wall -Werror -Wextra -std=c++98
 CC = c++
