@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: lduthill <lduthill@42perpignan.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:34:12 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/17 04:42:37 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/20 16:15:04 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,9 @@ Server::~Server()
 {
 	close(_socket);
 }
+
+
+
 
 void	Server::init()
 {
@@ -53,5 +56,22 @@ void	Server::init()
 		perror("listen");
 		exit(EXIT_FAILURE);
 	}
-	
+	socklen_t addrlen = sizeof(address);
+	if ((_new_socket = accept(_socket, (struct sockaddr*)&address, &addrlen)) < 0)
+	{
+		perror("accept");
+		exit(EXIT_FAILURE);
+	}
+
+	struct pollfd pstruct[1];
+
+	pstruct[0].fd = _new_socket;
+	pstruct[0].events = POLLIN;
+	char buffer[1024] = {0};
+
+	while(poll(pstruct, 2, 0) != -1)
+	{
+		_valread = read(_new_socket, buffer, 1024 - 1);
+		std::cout << "BUFFER =" << buffer << std::endl;
+	}
 }

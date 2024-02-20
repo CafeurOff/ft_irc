@@ -6,7 +6,7 @@
 /*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/12 16:28:11 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/17 04:45:45 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/20 14:53:42 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ int	main(int ac, char **av)
 void	ft_launch_server(char **av)
 {
 	Server server(av);
+	server.init();
 	while (1)
-		server.init();
-
+		continue;
 }
