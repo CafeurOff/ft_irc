@@ -6,7 +6,7 @@
 /*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:34:12 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/22 16:37:10 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/22 17:28:46 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ Server::~Server()
 
 void	Server::Launch()
 {
-	struct pollfd pstruct[20 + 1];
+	struct pollfd pstruct[MAX_CLIENT + 1];
 
 	pstruct[0].fd = _socket;
 	pstruct[0].events = POLLIN | POLLPRI;
@@ -35,18 +35,27 @@ void	Server::Launch()
 
 	while (1)
 	{
-		poll(pstruct, use_client + 1, 0);
-		for (int i = 1; i < 20; i++)
+		int rc = poll(pstruct, use_client + 1, 5000);
+		if (rc > 0)
 		{
-			if (pstruct[i].fd == 0)
+			if (pstruct[0].revents & POLLIN)
 			{
-				pstruct[i].fd = _new_socket;
-				pstruct[i].events = POLLIN;
-				use_client++;
-				break;
+                struct sockaddr_in cliaddr;
+				socklen_t addrlen = sizeof(cliaddr);
+				_new_socket = accept(_socket, (struct sockaddr *)&cliaddr, &addrlen);
+				for (int i = 1; i < MAX_CLIENT; i++)
+				{
+					if (pstruct[i].fd == 0)
+					{
+						pstruct[i].fd = _new_socket;
+						pstruct[i].events = POLLIN | POLLPRI;
+						use_client++;
+						break;
+					}
+				}
 			}
 		}
-		for (int i = 1; i < 20; i++)
+		for (int i = 1; i < MAX_CLIENT; i++)
 		{
 			if (pstruct[i].fd > 0 && pstruct[i].revents & POLLIN)
 			{
@@ -68,7 +77,7 @@ void	Server::Launch()
 				}
 				else
 				{
-					std::cout << "FD CLIENT" << pstruct[0].fd << std::endl;
+					std::cout << "FD CLIENT = " << pstruct[i].fd << std::endl;
 					std::cout << "Client =" << buffer << std::endl;
 				}
 			}
@@ -102,12 +111,6 @@ void	Server::init()
 	if (listen(_socket, 3) < 0)
 	{
 		perror("listen");
-		exit(EXIT_FAILURE);
-	}
-	socklen_t addrlen = sizeof(address);
-	if ((_new_socket = accept(_socket, (struct sockaddr*)&address, &addrlen)) < 0)
-	{
-		perror("accept");
 		exit(EXIT_FAILURE);
 	}
 	Launch();
