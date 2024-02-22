@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <lduthill@42perpignan.fr>         +#+  +:+       +#+        */
+/*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:34:12 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/20 16:15:04 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/22 16:37:10 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,56 @@ Server::~Server()
 	close(_socket);
 }
 
+void	Server::Launch()
+{
+	struct pollfd pstruct[20 + 1];
 
+	pstruct[0].fd = _socket;
+	pstruct[0].events = POLLIN | POLLPRI;
+	int	use_client = 0;
 
+	while (1)
+	{
+		poll(pstruct, use_client + 1, 0);
+		for (int i = 1; i < 20; i++)
+		{
+			if (pstruct[i].fd == 0)
+			{
+				pstruct[i].fd = _new_socket;
+				pstruct[i].events = POLLIN;
+				use_client++;
+				break;
+			}
+		}
+		for (int i = 1; i < 20; i++)
+		{
+			if (pstruct[i].fd > 0 && pstruct[i].revents & POLLIN)
+			{
+				char buffer[1024] = { 0 };
+				int	buff_len = read(pstruct[i].fd, buffer, 1024 - 1);
+				if (buff_len == -1)
+				{
+					pstruct[i].fd = 0;
+					pstruct[i].events = 0;
+					pstruct[i].revents = 0;
+					use_client--;
+				}
+				else if (buff_len == 0)
+				{
+					pstruct[i].fd = 0;
+					pstruct[i].events = 0;
+					pstruct[i].revents = 0;
+					use_client--;
+				}
+				else
+				{
+					std::cout << "FD CLIENT" << pstruct[0].fd << std::endl;
+					std::cout << "Client =" << buffer << std::endl;
+				}
+			}
+		}
+	}
+}
 
 void	Server::init()
 {
@@ -62,16 +110,5 @@ void	Server::init()
 		perror("accept");
 		exit(EXIT_FAILURE);
 	}
-
-	struct pollfd pstruct[1];
-
-	pstruct[0].fd = _new_socket;
-	pstruct[0].events = POLLIN;
-	char buffer[1024] = {0};
-
-	while(poll(pstruct, 2, 0) != -1)
-	{
-		_valread = read(_new_socket, buffer, 1024 - 1);
-		std::cout << "BUFFER =" << buffer << std::endl;
-	}
+	Launch();
 }
