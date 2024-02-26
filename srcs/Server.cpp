@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:34:12 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/22 17:28:46 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/26 23:08:45 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,19 +23,20 @@ Server::Server(char **av)
 Server::~Server()
 {
 	close(_socket);
+	close(_new_socket);
 }
 
 void	Server::Launch()
 {
 	struct pollfd pstruct[MAX_CLIENT + 1];
-
+	memset(pstruct, 0, sizeof(pstruct)); // FIX OF FUCKING PROBLEM DE GROSSE MERDE TOUT CA PARCEQUE POLLFD EST PAS INITIALISE A 0 DE MERDE SA PUE LA MERDE
 	pstruct[0].fd = _socket;
 	pstruct[0].events = POLLIN | POLLPRI;
-	int	use_client = 0;
+	int	nb_client = 0;
 
 	while (1)
 	{
-		int rc = poll(pstruct, use_client + 1, 5000);
+		int rc = poll(pstruct, nb_client + 1, 5000);
 		if (rc > 0)
 		{
 			if (pstruct[0].revents & POLLIN)
@@ -49,7 +50,7 @@ void	Server::Launch()
 					{
 						pstruct[i].fd = _new_socket;
 						pstruct[i].events = POLLIN | POLLPRI;
-						use_client++;
+						nb_client++;
 						break;
 					}
 				}
@@ -60,25 +61,18 @@ void	Server::Launch()
 			if (pstruct[i].fd > 0 && pstruct[i].revents & POLLIN)
 			{
 				char buffer[1024] = { 0 };
-				int	buff_len = read(pstruct[i].fd, buffer, 1024 - 1);
-				if (buff_len == -1)
+				_valread = read(pstruct[i].fd, buffer, 1024 - 1);
+				if (_valread == -1 || _valread == 0)
 				{
 					pstruct[i].fd = 0;
 					pstruct[i].events = 0;
 					pstruct[i].revents = 0;
-					use_client--;
-				}
-				else if (buff_len == 0)
-				{
-					pstruct[i].fd = 0;
-					pstruct[i].events = 0;
-					pstruct[i].revents = 0;
-					use_client--;
+					nb_client--;
 				}
 				else
 				{
-					std::cout << "FD CLIENT = " << pstruct[i].fd << std::endl;
-					std::cout << "Client =" << buffer << std::endl;
+					std::cout << "[FD] " << pstruct[i].fd << " : " << buffer << std::endl;
+					std::cout << "nb_client : " << nb_client << std::endl;
 				}
 			}
 		}

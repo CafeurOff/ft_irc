@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:31:00 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/22 17:29:06 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/26 23:00:50 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 #define MAX_CLIENT 20
 
-#include "irc.hpp"	
+#include "irc.hpp"
 
 class Server
 {
@@ -22,8 +22,9 @@ public:
 	Server(char **av);
 	~Server();
 
-	void	init();
-	void	Launch();
+	void		init();
+	void		Launch();
+	std::string	ParseBuffer(char *buffer, int client);
 private:
 
 	int		_port;
