@@ -10,6 +10,11 @@ Channel::Channel(std::string nameChannel) : _nameChannel(nameChannel)
 
 }
 
+Channel::Channel(std::string nameChannel, std::string password) : _nameChannel(nameChannel), _password(password)
+{
+
+}
+
 Channel::~Channel()
 {
 
