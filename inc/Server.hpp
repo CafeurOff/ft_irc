@@ -3,16 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:31:00 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/17 04:41:43 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/22 17:29:06 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "irc.hpp"	// irc.hpp include all the necessary headers
+#define MAX_CLIENT 20
+
+#include "irc.hpp"	
 
 class Server
 {
@@ -21,6 +23,7 @@ public:
 	~Server();
 
 	void	init();
+	void	Launch();
 private:
 
 	int		_port;
