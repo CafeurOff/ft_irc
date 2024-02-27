@@ -76,10 +76,7 @@ void	Server::Launch()
 					use_client--;
 				}
 				else
-				{
-					std::cout << "FD CLIENT = " << pstruct[i].fd << std::endl;
-					std::cout << "Client =" << buffer << std::endl;
-				}
+					ft_parse_buffer(buffer, pstruct[i].fd);
 			}
 		}
 	}

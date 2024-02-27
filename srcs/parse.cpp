@@ -3,7 +3,7 @@
 
 void	Server::ft_parse_buffer(std::string buffer, int client)
 {
-	std::cout << buffer << std::endl;
+//	std::cout << buffer << std::endl;
 	if (buffer.compare(0, 5, "PASS ") == 0)
 		ft_verif_pass(buffer, client);
 	if (buffer.compare(0, 5, "NICK ") == 0)
@@ -24,19 +24,27 @@ void	Server::ft_parse_buffer(std::string buffer, int client)
 
 void	Server::ft_verif_pass(std::string buffer, int client)
 {
-	if (buffer.compare(6, _password.length(), _password) == 0)
+	std::string pass;
+	pass = buffer.substr(6, buffer.length() - 7);
+	std::cout << pass << pass.length() << _password << std::endl;
+	if (pass.compare(0, _password.length() + 1, _password) == 0)
 	{
+		std::cout << "gg" <<std::endl;
 		//if (client existe déjà)
 //			ft_send_error(462, "PASS");
 		//else
 			//construct client
 	}
+	else
+		std::cout << "not" << std::endl;
 //	else
 //		ft_send_error(461, "PASS");
+	(void)client;
 }
 
 void	Server::ft_nick_receive(std::string buffer, int client)
 {
+	std::string	nick;
 //	if (buffer.length() <= 7)
 //		ft_send_error(431, "NICK");
 	(void)buffer;
@@ -78,6 +86,7 @@ void	Server::ft_invite_receive(std::string buffer, int client)
 	(void)buffer;
 	(void)client;
 }
+
 /*
 void	Server::ft_send_error(461, "PASS")
 {

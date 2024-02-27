@@ -24,6 +24,17 @@ public:
 
 	void	init();
 	void	Launch();
+	
+	void	ft_parse_buffer(std::string buffer, int client);
+	void	ft_verif_pass(std::string buffer, int client);
+	void	ft_nick_receive(std::string buffer, int client);
+	void	ft_user_receive(std::string buffer, int client);
+	void	ft_quit_user(std::string buffer, int client);
+	void	ft_join_receive(std::string buffer, int client);
+	void	ft_mode_receive(std::string buffer, int client);
+	void	ft_topic_receive(std::string buffer, int client);
+	void	ft_invite_receive(std::string buffer, int client);
+
 private:
 
 	int		_port;
