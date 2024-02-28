@@ -6,7 +6,7 @@ CC = c++
 
 # Sources Files
 SRCS_FOLDER = srcs/
-SRCS = srcs/main.cpp srcs/Server.cpp
+SRCS = srcs/main.cpp srcs/Server.cpp srcs/parse.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors

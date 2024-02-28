@@ -6,7 +6,7 @@
 /*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:34:12 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/26 23:08:45 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/28 23:32:28 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ Server::~Server()
 void	Server::Launch()
 {
 	struct pollfd pstruct[MAX_CLIENT + 1];
-	memset(pstruct, 0, sizeof(pstruct)); // FIX OF FUCKING PROBLEM DE GROSSE MERDE TOUT CA PARCEQUE POLLFD EST PAS INITIALISE A 0 DE MERDE SA PUE LA MERDE
+	memset(pstruct, 0, sizeof(pstruct));
 	pstruct[0].fd = _socket;
 	pstruct[0].events = POLLIN | POLLPRI;
 	int	nb_client = 0;
@@ -44,7 +44,7 @@ void	Server::Launch()
                 struct sockaddr_in cliaddr;
 				socklen_t addrlen = sizeof(cliaddr);
 				_new_socket = accept(_socket, (struct sockaddr *)&cliaddr, &addrlen);
-				for (int i = 1; i < MAX_CLIENT; i++)
+				for (int i = 1; i <= MAX_CLIENT; i++)
 				{
 					if (pstruct[i].fd == 0)
 					{
@@ -56,7 +56,7 @@ void	Server::Launch()
 				}
 			}
 		}
-		for (int i = 1; i < MAX_CLIENT; i++)
+		for (int i = 1; i <= MAX_CLIENT; i++)
 		{
 			if (pstruct[i].fd > 0 && pstruct[i].revents & POLLIN)
 			{
@@ -71,8 +71,7 @@ void	Server::Launch()
 				}
 				else
 				{
-					std::cout << "[FD] " << pstruct[i].fd << " : " << buffer << std::endl;
-					std::cout << "nb_client : " << nb_client << std::endl;
+					ft_parse_buffer(buffer, pstruct[i].fd);
 				}
 			}
 		}
@@ -85,12 +84,12 @@ void	Server::init()
 
 	if (_socket == 0)
 	{
-		perror("socket failed");
+		std::cerr << "socket failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &_opt, sizeof(_opt)))
 	{
-		perror("setsockopt");
+		std::cerr << "setsockopt failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	address.sin_family = AF_INET;
@@ -98,14 +97,23 @@ void	Server::init()
 	address.sin_port = htons(_port);
 	if (bind(_socket, (struct sockaddr *)&address, sizeof(address)) < 0)
 	{
-		perror("bind failed");
+		std::cerr << "bind failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	std::cout << "Server is running on port " << _port << std::endl;
 	if (listen(_socket, 3) < 0)
 	{
-		perror("listen");
+		std::cerr << "listen failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	Launch();
+}
+
+std::string		Server::ft_getServerName()
+{
+	char hostname[1024];
+	hostname[1023] = '\0';
+	gethostbyname(hostname);
+	_servername = hostname;
+	return (_servername);
 }
