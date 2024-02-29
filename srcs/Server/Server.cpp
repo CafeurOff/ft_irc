@@ -6,7 +6,7 @@
 /*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:34:12 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/29 14:45:26 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/29 15:59:34 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,7 @@ Server::~Server()
 
 void	Server::Launch()
 {
-	struct pollfd pstruct[MAX_CLIENT + 1];
-	memset(pstruct, 0, sizeof(pstruct));
+	struct pollfd pstruct[MAX_CLIENT + 1] = {};
 	pstruct[0].fd = _socket;
 	pstruct[0].events = POLLIN | POLLPRI;
 	int	nb_client = 0;

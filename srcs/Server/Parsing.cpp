@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse.cpp                                          :+:      :+:    :+:   */
+/*   Parsing.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/28 23:14:19 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/29 15:07:38 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/29 16:03:09 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void	Server::ft_parse_buffer(std::string buffer, int client)
 	{
 		std::cout << "[FD] --> " << client << " | " << "Buffer :" << buffer << std::endl;
 	}
+	
 	if (buffer.compare(0, 5, "PASS ") == 0)
 		ft_verif_pass(buffer, client);
 	if (buffer.compare(0, 5, "NICK ") == 0)
@@ -43,14 +44,14 @@ void	Server::ft_verif_pass(std::string buffer, int client)
 	pass = buffer.substr(6, buffer.length() - 7);
 	if (pass.compare(0, _password.length() + 1, _password) == 0)
 	{
-		std::cout << "PASSWORD GOOD" <<std::endl;
+		std::cout << "PASSWORD GOOD" << std::endl;
 		//if (client existe déjà)
 //			ft_send_error(462, "PASS");
 		//else
 			//construct client
 	}
 	else
-		ft_send_error(461, "Wrong Password");
+		ft_send_error(464, "Wrong Password");
 	(void)client;
 }
 
@@ -104,10 +105,9 @@ void	Server::ft_send_error(int error, std::string command)
 	std::string error_code;
 	std::string error_message;
 	std::string error_send;
-
+	
 	error_code = SSTR(error);
 	error_message = " :";
 	error_send = ":" + _servername + " " + error_code + " " + command + error_message + "\r\n";
-	std::cout << _new_socket << std::endl;
 	send(_new_socket, error_send.c_str(), error_send.length(), 0);
 }
