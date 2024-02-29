@@ -16,8 +16,29 @@ class Channel;
 class server
 {
     public:
+        void Channel::addChannel(std::string const &name)
+        {
+            if (_channel.find(name) != _channel.end())
+            {
+                //ERROR
+                return ;
+            }
+            _channels.insert(std::pair(name, Channel(name)));
+        }
+
+        void Channel::addChannelPassword(std::string const &name, std::string const &password)
+        {
+            if (_channel.find(name) != _channel.end())
+            {
+                //ERROR
+                return ;
+            }
+            _channels.insert(std::pair(name, Channel(name, password)));
+        }
 
     private:
-        std::vector<std::string> _channel;
-        std::map<std::string, std::string> _client;
+        std::map<std::string, Channel> _channel;
+        std::map<std::string, Client> _client;
 };
+
+
