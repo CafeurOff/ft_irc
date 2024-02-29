@@ -38,5 +38,6 @@ class Channel {
         int _nUser;
         std::map<std::string, Client*> _operators;
         std::map<std::string, Client*> _regulars;
+        
 
 };

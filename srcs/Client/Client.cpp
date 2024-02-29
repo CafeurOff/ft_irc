@@ -28,11 +28,4 @@ void Client::setUsername(const std::string &username){
     _username = username;
 }
 
-Client* Client::findClientByNickname(const std::string& nickname){
-    for (std::vector<Client*>::iterator it = Client::clients.begin(); it != Client::clients.end(); it++){
-        if ((*it)->getNickname() == nickname)
-            return (*it);
-    }
-    return (NULL);
-}
 

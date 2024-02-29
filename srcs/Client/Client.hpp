@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <vector>
 #include <ctime>
+#include <map>
 
 class Client{
     public:
@@ -19,7 +20,6 @@ class Client{
         int getFd() const;
         void setNickname(const std::string &nickname);
         void setUsername(const std::string &username);
-        static Client* findClientByNickname(const std::string& nickname);
     private:
         std::string _nickname;
         std::string _username;
