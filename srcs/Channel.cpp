@@ -1,7 +1,5 @@
 #include "Channel.hpp"
 
-#include "Channel.hpp"
-
 Channel::Channel(const std::string& name)
         : _name(name), _password(""), _topic(""), _inviteOnly(false),
           _restrictTopic(true), _limitUser(false), _passwordUse(false),
