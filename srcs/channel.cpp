@@ -8,8 +8,8 @@ Channel::Channel(const std::string& name)
           _nUser(0) {}
 
 
-Channel::Channel(std::string nameChannel, std::string password) 
-        : _name(name), _password(""), _topic(""), _inviteOnly(false),
+Channel::Channel(std::string name, std::string password) 
+        : _name(name), _password(password), _topic(""), _inviteOnly(false),
           _restrictTopic(true), _limitUser(false), _passwordUse(true),
           _nUser(0) {}
 
@@ -157,6 +157,9 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
         return;
     }
 
+    if (_restrictTopic == false)
+        return ;
+
     // If no new topic is specified, send the current topic to the sender
     if (newTopic.empty()) {
         sendNumericResponse(sender, "332", sender->getNickname(), _name); // RPL_TOPIC
@@ -186,10 +189,10 @@ void Channel::checkMode(std::string **mess)
         std::string paramString;
         if (modeString.size() < 2)
             continue;
-        char modeSign = modeString[0];
-        char modeChar = modeString[1];
+        char modeSign = modeString[0][0];
+        char modeChar = modeString[0][1];
         if (modeString.size() > 2)
-            paramString = modeString.substr(2);
+            paramString = modeString[1];
         modifMode(modeSign, modeChar, paramString);
         i++;
     }
@@ -206,11 +209,13 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
         }
         else if (modeChar == 't') //Definir les restrictions de la commande TOPIC pour les operateurs
         {
-
+            if (_restrictTopic == false)
+                _restricTopic = true;
         }
         else if (modeChar == 'k') //Definir un mot de passe
         {
-
+            if (_passwordUse == false)
+                setPassword(param);
         }
         else if (modeChar == 'o') //Donner le privilege d'operateur
         {
@@ -230,11 +235,16 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
         }
         else if (modeChar == 't') //Supprimer les restrictions de la commande TOPIC pour les operateurs
         {
-
+            if (_restrictTopic == true)
+                _restrictTopic = false;
         }
         else if (modeChar == 'k') //Supprimer le mot de passe
         {
-
+            if (_passwordUse == true)
+            {
+                _passwordUse = false;
+               _password = "";
+            }
         }
         else if (modeChar == 'o') //Recevoir le privilege d'operateur
         {
@@ -245,4 +255,10 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
             
         }
     }
+}
+
+void Channel::setParam(std::string &param)
+{
+    _passwordUse = true;
+    _password = param;
 }
