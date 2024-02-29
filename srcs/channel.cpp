@@ -19,18 +19,10 @@ Channel::~Channel()
 
 }
 
-
-void Channel::sendMessage(Client* client, const std::string& msg) 
-{
-    send(client->getFd(), msg.c_str(), msg.size(), MSG_CONFIRM); // MSG_CONFIRM is a flag to tell the receiver that the data was received correctly
-}
-
 void Channel::createChannel(const std::string& name, Client* creator) 
 {
-    Channel channel(name);
-
-    channel._operators[creator->getNickname()] = creator;
-    channel._regulars[creator->getNickname()] = creator;
+    _channel._operators[creator->getNickname()] = creator;
+    _channel._regulars[creator->getNickname()] = creator;
 
     std::string joinMsg = ":" + creator->getNickname() + "!~" + creator->getUsername()[0] + "@127.0.0.1 JOIN #" + name + "\n";
     sendMessage(creator, joinMsg);
@@ -38,12 +30,18 @@ void Channel::createChannel(const std::string& name, Client* creator)
     std::string modeMsg = ":127.0.0.1 MODE #" + name + " +nt\n"; // RPL_CHANNELMODEIS
     sendMessage(creator, modeMsg);
 
-    std::string namesMsg = ":127.0.0.1 353 " + creator->getNickname() + " = #" + channel._name + " :@" + creator->getNickname() + "\n"; // RPL_NAMREPLY
+    std::string namesMsg = ":127.0.0.1 353 " + creator->getNickname() + " = #" + _channel._name + " :@" + creator->getNickname() + "\n"; // RPL_NAMREPLY
     sendMessage(creator, namesMsg);
 
     std::string endNamesMsg = ":127.0.0.1 366 " + creator->getNickname() + " #" + name + " :End of /NAMES list.\n"; // RPL_ENDOFNAMES
     sendMessage(creator, endNamesMsg);
 }
+
+void Channel::sendMessage(Client* client, const std::string& msg) 
+{
+    send(client->getFd(), msg.c_str(), msg.size(), MSG_CONFIRM); // MSG_CONFIRM is a flag to tell the receiver that the data was received correctly
+}
+
 
 const std::string& Channel::getName() const 
 {

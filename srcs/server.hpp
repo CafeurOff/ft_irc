@@ -16,24 +16,28 @@ class Channel;
 class server
 {
     public:
-        void Channel::addChannel(std::string const &name)
+        void Channel::addChannel(std::string const &name, Client* client)
         {
+            Channel(name) channel1;
             if (_channel.find(name) != _channel.end())
             {
                 //ERROR
                 return ;
             }
-            _channels.insert(std::pair(name, Channel(name)));
+            _channels.insert(std::pair(name, channel1));
+            channel1.createChannel(name, client);
         }
 
-        void Channel::addChannelPassword(std::string const &name, std::string const &password)
+        void Channel::addChannelPassword(std::string const &name, std::string const &password, Client* client)
         {
+            Channel(name, password) channel1;
             if (_channel.find(name) != _channel.end())
             {
                 //ERROR
                 return ;
             }
-            _channels.insert(std::pair(name, Channel(name, password)));
+            _channels.insert(std::pair(name, channel1));
+            channel1.createChannel(name, client);
         }
 
     private:

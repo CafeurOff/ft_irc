@@ -22,8 +22,8 @@ class Channel
         std::map<std::string, Client*> _invited;
 
     public:
-        Channel(std::string nameChannel):
-        Channel(std::string nameChanel, std::string password);
+        Channel(std::string name):
+        Channel(std::string name, std::string password);
         ~Channel();
 
         const std::string &getName() const;
