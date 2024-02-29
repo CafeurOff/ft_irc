@@ -176,51 +176,73 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
     sendAll(topicMessage);
 }
 
-void Channel::mode(std::string const& mess)
+
+void Channel::checkMode(std::string **mess)
 {
-        std::isstringstream modeStream(mess);
-        std::string channelName:
+    size_t i = 0;
+    while (mess[i] != NULL)
+    {
+        std::string modeString = *mess[i];
+        std::string paramString;
+        if (modeString.size() < 2)
+            continue;
+        char modeSign = modeString[0];
+        char modeChar = modeString[1];
+        if (modeString.size() > 2)
+            paramString = modeString.substr(2);
+        modifMode(modeSign, modeChar, paramString);
+        i++;
+    }
+}
 
-        char mode;
-
-        while (modeStream >> mode)
+void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
+{
+    if (modeSign == '+')
+    {
+        if (modeChar == 'i') //Change Invite Only sur true
         {
-            switch (mode)
-            {
-                case '+' :
-                    while (modeStream >> mode)
-                    {
-                        switch (mode)
-                        {
-                            case 'i': //Change Invite Only sur true
-                                if (_inviteOnly == false)
-                                    _inviteOnly = true
-                            case 't': //Definir les restrictions de la commande TOPIC pour les operateurs
-
-                            case 'k': //Definir un mot de passe
-
-                            case 'o': //Donner le privilege d'operateur
-                            
-                            case 'l': //Definir une limite d'utilisateur du canal
-                        }
-                    }
-                case '-':
-                    while (modeStream >> mode)
-                    {
-                        switch (mode)
-                        {
-                            case 'i' : //Change invite only on false
-                                if (_inviteOnly == true)
-                                    _inviteOnly = false;
-                            case 't': //Supprimer les restrictions de la commande TOPIC pour les operateurs
-
-                            case 'k': //Supprimer le mot de passe
-
-                            case 'o': //Recevoir le privilege d'operateur
-                            
-                            case 'l': //Supprimer la limite d'utilisateur du canal
-                        }
-                    }
-            }
+            if (_inviteOnly == false)
+                _inviteOnly = true
         }
+        else if (modeChar == 't') //Definir les restrictions de la commande TOPIC pour les operateurs
+        {
+
+        }
+        else if (modeChar == 'k') //Definir un mot de passe
+        {
+
+        }
+        else if (modeChar == 'o') //Donner le privilege d'operateur
+        {
+
+        }
+        else if (modeChar == 'l') //Definir une limite d'utilisateur du canal
+        {
+
+        }
+    }
+    else if (modeSign == '-')
+    {
+        if (modeChar == 'i') //Change invite only on false
+        {
+            if (_inviteOnly == true)
+                _inviteOnly = false;
+        }
+        else if (modeChar == 't') //Supprimer les restrictions de la commande TOPIC pour les operateurs
+        {
+
+        }
+        else if (modeChar == 'k') //Supprimer le mot de passe
+        {
+
+        }
+        else if (modeChar == 'o') //Recevoir le privilege d'operateur
+        {
+
+        }
+        else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
+        {
+            
+        }
+    }
 }

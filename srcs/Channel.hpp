@@ -39,4 +39,7 @@ class Channel
         void removeUser(Client* user);
         void invite(Client* sender, const std::string& targetNickname);
         void topic(Client* sender, const std::string& newTopic);
+
+        void checkMode(std::string **mess);
+        void modifMode(char modeSign, char modeChar, const std::string &param);
 };
