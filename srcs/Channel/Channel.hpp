@@ -26,7 +26,7 @@ class Channel {
         void addUser(Client* user);
         void removeUser(Client* user);
         void invite(Client* sender, const std::string& targetNickname);
-        void 
+        void topic(Client* sender, const std::string& newTopic);
     private:
         std::string _name;
         std::string _password;

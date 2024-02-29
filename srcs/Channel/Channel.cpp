@@ -65,7 +65,7 @@ void Channel::kick(Client* creator, const std::string& targetNickname){
 
     if (targetRegular == _regulars.end())
     {
-        sendNumericResponse(creator, "442", creator->getNickname(), _name);
+        sendNumericResponse(creator, "442", creator->getNickname(), _name); // ERR_NOTONCHANNEL
     }
     else if (targetOperator != _operators.end())
     {
@@ -117,3 +117,28 @@ void Channel::invite(Client* sender, const std::string& targetNickname) {
     }
 }
 
+void Channel::topic(Client* sender, const std::string& newTopic) {
+    // Check if the sender is an operator of the channel or the only person in it
+    if (_restrictTopic && _operators.find(sender->getNickname()) == _operators.end()) {
+        sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
+        return;
+    }
+
+    // If no new topic is specified, send the current topic to the sender
+    if (newTopic.empty()) {
+        sendNumericResponse(sender, "332", sender->getNickname(), _name); // RPL_TOPIC
+        sendNumericResponse(sender, "333", sender->getNickname(), _name, _topic); // RPL_TOPICWHOTIME
+        return;
+    }
+
+    // Check if the new topic is too long
+    if (newTopic.size() > 80) {
+        sendNumericResponse(sender, "409", sender->getNickname(), _name); // ERR_TOOLONG
+        return;
+    }
+
+    // If everything is fine, change the topic and notify all users about this event
+    _topic = newTopic;
+    std::string topicMessage = ":" + sender->getNickname() + "!~" + sender->getUsername() + "@127.0.0.1 TOPIC #" + _name + " :" + _topic + "\n";
+    sendAll(topicMessage);
+}
