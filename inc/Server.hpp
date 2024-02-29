@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:31:00 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/28 23:25:10 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/29 14:57:33 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #define MAX_CLIENT 20
+#define DEBUG true
 
 #include "irc.hpp"
 

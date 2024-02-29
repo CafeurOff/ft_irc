@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:34:12 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/28 23:32:28 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/02/29 14:45:26 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/Server.hpp"
+#include "../../inc/Server.hpp"
 
 Server::Server(char **av)
 {
@@ -70,9 +70,7 @@ void	Server::Launch()
 					nb_client--;
 				}
 				else
-				{
 					ft_parse_buffer(buffer, pstruct[i].fd);
-				}
 			}
 		}
 	}
