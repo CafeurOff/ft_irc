@@ -34,6 +34,7 @@ public:
 	void	ft_mode_receive(std::string buffer, int client);
 	void	ft_topic_receive(std::string buffer, int client);
 	void	ft_invite_receive(std::string buffer, int client);
+	void	ft_send_error(int error, std::string command, std::string err_msg);
 
 private:
 
