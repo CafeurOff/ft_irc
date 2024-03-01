@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 04:31:00 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/29 14:57:33 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/03/01 01:37:02 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,8 @@ private:
 	ssize_t		_valread;
 	std::string	_password;
 	std::string	_servername;
+	typedef void (Server::*CommandFunction)(std::string, int);
+    std::map<std::string, CommandFunction> commandFunctions;
 };
 
 
