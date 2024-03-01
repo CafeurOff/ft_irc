@@ -111,3 +111,14 @@ std::string		Server::ft_getServerName()
 	_servername = hostname;
 	return (_servername);
 }
+
+int Server::findFdByNickname(const std::string& nickname) {
+    std::map<std::string, Client>::iterator it = _client.find(nickname);
+    if (it != _client.end()) {
+        // Le client a été trouvé dans la map
+        return it->second.getFd();
+    } else {
+        // Le client n'a pas été trouvé dans la map
+        return -1;
+    }
+}

@@ -40,29 +40,31 @@ class Server
 
 		std::string ft_getServerName();
 
-		void Channel::addChannel(std::string const &name, Client* client)
-        {
-            Channel(name) channel1;
-            if (_channel.find(name) != _channel.end())
-            {
-                //ERROR
-                return ;
-            }
-            _channels.insert(std::pair(name, channel1));
-            channel1.createChannel(name, client);
-        }
+		int findFdByNickname(const std::string& nickname);
 
-        void Channel::addChannelPassword(std::string const &name, std::string const &password, Client* client)
-        {
-            Channel(name, password) channel1;
-            if (_channel.find(name) != _channel.end())
-            {
-                //ERROR
-                return ;
-            }
-            _channels.insert(std::pair(name, channel1));
-            channel1.createChannel(name, client);
-        }
+		void Channel::addChannel(std::string const &name, Client* client)
+		{
+			Channel(name) channel1;
+			if (_channel.find(name) != _channel.end())
+			{
+				//ERROR
+				return ;
+			}
+			_channels.insert(std::pair(name, channel1));
+			channel1.createChannel(name, client);
+		}
+
+		void Channel::addChannelPassword(std::string const &name, std::string const &password, Client* client)
+		{
+			Channel(name, password) channel1;
+			if (_channel.find(name) != _channel.end())
+			{
+				//ERROR
+				return ;
+			}
+			_channels.insert(std::pair(name, channel1));
+			channel1.createChannel(name, client);
+		}
 
 	private:
 
@@ -75,6 +77,6 @@ class Server
 		std::string	_servername;
 		typedef void (Server::*CommandFunction)(std::string, int);
 		std::map<std::string, CommandFunction> commandFunctions;
-        std::map<std::string, Channel> _channel;
-        std::map<std::string, Client> _client;
+		std::map<std::string, Channel> _channel;
+		std::map<std::string, Client> _client;
 };
