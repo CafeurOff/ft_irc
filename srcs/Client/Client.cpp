@@ -27,7 +27,7 @@ std::string const& Client::getUsername() const
 
 int Client::getFd() const
 {
-    return (_fd);
+    return (_fdClient);
 }
 
 void Client::setNickname(const std::string &nickname)

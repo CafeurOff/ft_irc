@@ -13,9 +13,11 @@
 #include <sys/socket.h>
 #include <vector>
 #include <ctime>
+#include "Client.hpp"
+
 
 class Client;
-class Channel;
+//class Channel;
 
 class Server
 {
@@ -42,7 +44,7 @@ class Server
 
 		int findFdByNickname(const std::string& nickname);
 
-		void Channel::addChannel(std::string const &name, Client* client)
+		/*void Channel::addChannel(std::string const &name, Client* client)
 		{
 			Channel(name) channel1;
 			if (_channel.find(name) != _channel.end())
@@ -64,7 +66,7 @@ class Server
 			}
 			_channels.insert(std::pair(name, channel1));
 			channel1.createChannel(name, client);
-		}
+		}*/
 
 	private:
 
@@ -77,6 +79,6 @@ class Server
 		std::string	_servername;
 		typedef void (Server::*CommandFunction)(std::string, int);
 		std::map<std::string, CommandFunction> commandFunctions;
-		std::map<std::string, Channel> _channel;
-		std::map<std::string, Client> _client;
+		//std::map<std::string, Channel> _channel;
+		std::map<int , Client> _client;
 };

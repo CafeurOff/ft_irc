@@ -24,7 +24,8 @@ void	Server::ft_verif_pass(std::string buffer, int client)
 		//if (client existe déjà)
 			//ft_send_error(462, "PASS");
 		//else
-			//construct client
+		_client.insert(std::pair<int, Client>(client , Client(client)));
+}
 	}
 //	else if (pass.length() == 0) 
 //		ft_send_error(461, "PASS");*

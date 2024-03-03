@@ -1,5 +1,7 @@
 #include "../inc/irc.hpp"
 #include "../inc/Server.hpp"
+#include "../inc/Client.hpp"
+#include "../inc/Channel.hpp"
 
 int	main(int ac, char **av)
 {

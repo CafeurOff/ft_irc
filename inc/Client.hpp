@@ -27,3 +27,4 @@ class Client
         void setNickname(const std::string &nickname);
         void setUsername(const std::string &username);
 };
+
