@@ -6,10 +6,10 @@ CC = c++
 
 # Sources Files
 SRCS_FOLDER = srcs/
-SRCS = srcs/main.cpp srcs/Server/Server.cpp srcs/Server/Parsing.cpp
+SRCS = srcs/main.cpp srcs/Server/Server.cpp srcs/Client/Client.cpp srcs/Server/Parsing.cpp srcs/Server/Utils.cpp srcs/Channel/Channel.cpp
 OBJS = $(SRCS:.cpp=.o)
 
-# Colors
+# Colorsq
 GREEN	=	\033[0;32m
 RED		=	\033[0;31m
 RESET	=	\033[0m
