@@ -38,6 +38,7 @@ void	Server::ft_privmsg(std::string buffer, int client)
     }
 }
 
+
 /*  SendMessage
 **  Sent a message to a user
 ** @param fd : the file descriptor of the user
@@ -45,10 +46,12 @@ void	Server::ft_privmsg(std::string buffer, int client)
 ** @param message : the message
 */
 
-void    Server::SendMessage(int fd, std::string sender, std::string message)
+void Server::SendMessage(int fd, const std::string& sender, const std::string& message)
 {
-    std::string msg;
-
-    msg = ":" + sender +  " PRIVMSG " + findClient(fd)->getNickname() + " :" + message + "\n";
-    send(fd, msg.c_str(), msg.length(), 0);
+    Client* client = findClient(fd);
+    if (client)
+    {
+        std::string msg = ":" + sender + " PRIVMSG " + client->getNickname() + " :" + message + "\n";
+        send(fd, msg.c_str(), msg.length(), 0);
+    }
 }

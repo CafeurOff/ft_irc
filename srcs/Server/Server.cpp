@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/02/17 04:34:12 by lduthill          #+#    #+#             */
-/*   Updated: 2024/03/01 01:37:12 by lduthill         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../../inc/Server.hpp"
 
 Server::Server(char **av)
@@ -27,6 +15,7 @@ Server::Server(char **av)
     commandFunctions["MODE"] = &Server::ft_mode_receive;
     commandFunctions["TOPIC"] = &Server::ft_topic_receive;
     commandFunctions["INVITE"] = &Server::ft_invite_receive;
+	commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
 }
 
 Server::~Server()
@@ -118,8 +107,46 @@ void	Server::init()
 std::string		Server::ft_getServerName()
 {
 	char hostname[1024];
-	hostname[1023] = '\0';
-	gethostbyname(hostname);
+
+	if (gethostname(hostname, sizeof(hostname)) == -1)
+	{
+		std::cerr << "gethostname failed" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	_servername = hostname;
 	return (_servername);
 }
+
+int Server::findFdByNickname(const std::string& nickname)
+{
+	std::map<int, Client>::iterator it;
+	for (it = _client.begin(); it != _client.end(); ++it)
+	{
+		if (it->second.getNickname() == nickname)
+			return (it->second.getFd());
+	}
+	return (-1);
+}
+
+int Server::findFd(int fd)
+{
+	std::map<int, Client>::iterator it;
+	for (it = _client.begin(); it != _client.end(); ++it)
+	{
+		if (it->first == fd)
+			return (1);
+	}
+	return (-1);
+}
+
+Client *Server::findClient(int fd)
+{
+	std::map<int, Client>::iterator it;
+	for (it = _client.begin(); it != _client.end(); ++it)
+	{
+		if (it->first == fd)
+			return (&it->second);
+	}
+	return (NULL);
+}
+

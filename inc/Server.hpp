@@ -41,7 +41,7 @@ class Server
 
 
 		void	ft_send_error(int fd, int error, std::string command, std::string type);
-		void	SendMessage(int fd, std::string sender, std::string message);
+		void	SendMessage(int fd, const std::string& sender, const std::string& message);
 
 		std::string ft_getServerName();
 
