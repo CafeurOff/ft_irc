@@ -38,7 +38,7 @@ class Server
 		void	ft_topic_receive(std::string buffer, int client);
 		void	ft_invite_receive(std::string buffer, int client);
 
-		void	ft_send_error(int error, std::string command);
+		void	ft_send_error(int error, std::string command, std::string type);
 
 		std::string ft_getServerName();
 

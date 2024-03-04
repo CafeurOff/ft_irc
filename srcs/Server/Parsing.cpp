@@ -22,16 +22,14 @@ void	Server::ft_verif_pass(std::string buffer, int client)
 	if (pass.compare(0, _password.length() + 1, _password) == 0)
 	{
 		//if (client existe déjà)
-			//ft_send_error(462, "PASS");
+			//ft_send_error(462, "PASS", "ERR_ALREADYREGISTRED");
 		//else
-		_client.insert(std::pair<int, Client>(client , Client(client)));
-}
+			_client.insert(std::pair<int, Client>(client , Client(client)));
 	}
-//	else if (pass.length() == 0) 
-//		ft_send_error(461, "PASS");*
-//	else
-//		ft_send_msg(464, "PASS", "ERR_PASSWDMISMATCH");
-	(void)client;
+	else if (pass.length() == 0) 
+		ft_send_error(461, "PASS", "ERR_NEEDMOREPARAMS");
+	else
+		ft_send_error(464, "PASS", "ERR_PASSWDMISMATCH");
 }
 
 void	Server::ft_nick_receive(std::string buffer, int client)
@@ -40,14 +38,14 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 	nick = buffer.substr(5, buffer.length() - 6);
 //	if (don't find a user with the same fd)
 //		ft_send_msg(464, "PASS", "ERR_PASSWDMISMATCH");
-//	if (buffer.length() <= 7)
-		//ft_send_error(431, "NICK");
-//	if (nick.find_first_of("*:@,!? ", 0) != std::string::npos)
-//		ft_send_error(432, "NICK");
+	if (buffer.length() <= 7)
+		ft_send_error(431, "NICK", "ERR_NONICKNAMEGIVEN");
+	if (nick.find_first_of("*:@,!? ", 0) != std::string::npos)
+		ft_send_error(432, "NICK", "ERR_ERRONEUSNICKNAME");
 //	if (find a user with the same name)
-//		ft_send_error(433, "NICK");
+//		ft_send_error(433, "NICK", "ERR_NICKNAMEINUSE");
 //	else
-//		ft_nick();
+//		ft_nick();//set nickname
 	(void)buffer;
 	(void)client;
 }
@@ -57,7 +55,7 @@ void	Server::ft_user_receive(std::string buffer, int client)
 	std::string	user;
 	user = buffer.substr(5, buffer.length() - 6);
 	user.erase(user.find_first_of(" ", 0), user.length());
-	//	if(client existe)
+//	if(client existe)
 //		ft_user();
 	(void)buffer;
 	(void)client;
@@ -96,14 +94,14 @@ void	Server::ft_invite_receive(std::string buffer, int client)
 	(void)client;
 }
 
-void	Server::ft_send_error(int error, std::string command)
+void	Server::ft_send_error(int error, std::string command, std::string type)
 {
 	std::string error_code;
 	std::string error_message;
 	std::string error_send;
 
 	error_code = SSTR(error);
-	error_message = " :";
+	error_message = " :" + type;
 	error_send = ":" + _servername + " " + error_code + " " + command + error_message + "\r\n";
 	send(_new_socket, error_send.c_str(), error_send.length(), 0);
 }
