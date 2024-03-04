@@ -6,7 +6,7 @@
 /*   By: lduthill <lduthill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/04 13:47:06 by lduthill          #+#    #+#             */
-/*   Updated: 2024/03/04 15:46:28 by lduthill         ###   ########.fr       */
+/*   Updated: 2024/03/04 15:57:45 by lduthill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,6 @@ void	Server::ft_privmsg(std::string buffer, int client)
             channel.erase(channel.find_first_of(" ", 0), channel.length());
     }
     message = std::string(buffer.begin() + buffer.find(":", 0) + 1, buffer.end());
-    if (message.find_first_of(" ", 0) != std::string::npos)
-        message.erase(message.find_first_of(" ", 0), message.length());
     receiver = buffer.substr(8, buffer.length() - 9);
     if (receiver.find_first_of(" ", 0) != std::string::npos)
 		receiver.erase(receiver.find_first_of(" ", 0), receiver .length());
