@@ -80,12 +80,11 @@ void	Server::ft_quit_user(std::string buffer, int client)
 		if (it->first == client)
 			_client.erase(it);
 	}
-	(void)buffer;
-	(void)client;
 }
 
 void	Server::ft_join_receive(std::string buffer, int client)
 {
+	
 	(void)buffer;
 	(void)client;
 }
