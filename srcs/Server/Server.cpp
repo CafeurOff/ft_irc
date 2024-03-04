@@ -15,6 +15,7 @@ Server::Server(char **av)
     commandFunctions["MODE"] = &Server::ft_mode_receive;
     commandFunctions["TOPIC"] = &Server::ft_topic_receive;
     commandFunctions["INVITE"] = &Server::ft_invite_receive;
+	commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
 }
 
 Server::~Server()
