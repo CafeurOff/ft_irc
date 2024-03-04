@@ -84,8 +84,22 @@ void	Server::ft_quit_user(std::string buffer, int client)
 
 void	Server::ft_join_receive(std::string buffer, int client)
 {
-	
-	//_channel.insert(std::pair<std::string, Channel>( , Channel(client)));
+	std::string channel;
+	std::string password;
+	if (buffer.find("#", 0) != std::string::npos)
+	{
+		if (buffer.find(" ", 5) != std::string::npos)
+		{
+			channel = buffer.substr(6, buffer.find(" ", 5) - 6);
+			password = buffer.substr(buffer.find(" ", 5), buffer.length() - buffer.find(" ", 5));
+			_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, password, findClient(client))));
+		}
+		else
+		{
+			channel = buffer.substr(6, buffer.length() - 6);
+			_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, findClient(client))));
+		}
+	}
 	(void)buffer;
 	(void)client;
 }

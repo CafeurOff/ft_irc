@@ -49,6 +49,6 @@ void    Server::SendMessage(int fd, std::string sender, std::string message)
 {
     std::string msg;
 
-    msg = "PRIVMSG " + sender + " :" + message + "\n";
+    msg = ":" + sender +  " PRIVMSG " + findClient(fd)->getNickname() + " :" + message + "\n";
     send(fd, msg.c_str(), msg.length(), 0);
 }
