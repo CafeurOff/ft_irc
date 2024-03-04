@@ -21,7 +21,7 @@ void	Server::ft_verif_pass(std::string buffer, int client)
 	pass = buffer.substr(6, buffer.length() - 7);
 	if (pass.compare(0, _password.length() + 1, _password) == 0)
 	{
-		if (findFd(client))
+		if (findFd(client) != -1)
 			ft_send_error(462, "PASS", "ERR_ALREADYREGISTRED");
 		else
 			_client.insert(std::pair<int, Client>(client , Client(client)));
@@ -44,7 +44,7 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 		ft_send_error(431, "NICK", "ERR_NONICKNAMEGIVEN");
 	if (nick.find_first_of("*:@,!? ", 0) != std::string::npos)
 		ft_send_error(432, "NICK", "ERR_ERRONEUSNICKNAME");
-	if (findFdByNickname(nick))
+	if (findFdByNickname(nick) != -1)
 		ft_send_error(433, "NICK", "ERR_NICKNAMEINUSE");
 	else
 	{
@@ -56,18 +56,15 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 void	Server::ft_user_receive(std::string buffer, int client)
 {
 	std::string	username;
-	std::map<int, Client>::iterator it;
+	Client	*user;
 
 	username = buffer.substr(5, buffer.length() - 6);
-	username.erase(username.find_first_of(" ", 0), username.length());
+	if (username.find_first_of(" ", 0) != std::string::npos)
+		username.erase(username.find_first_of(" ", 0), username.length());
 	if(findFd(client))
 	{
-			for (it = _client.begin(); it != _client.end(); ++it)
-			{
-				if (it->first == client)
-					_client.erase(it);
-			}
-
+		user = findClient(client);
+		user->setUsername(username);
 	}
 }
 
