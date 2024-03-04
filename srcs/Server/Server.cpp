@@ -12,3 +12,16 @@ int Server::findFdByNickname(const std::string& nickname) {
         return -1;
     }
 }
+
+// method pour cherche un fd dans une map, si il existe renvoie fd sinon -1
+
+int Server::findFd(int fd) {
+    for (std::map<std::string, Client>::iterator it = _clients.begin(); it != _clients.end(); it++) {
+        if (it->second.getFd() == fd) {
+            // Le fd a été trouvé dans la map
+            return fd;
+        }
+    }
+    // Le fd n'a pas été trouvé dans la map
+    return -1;
+}

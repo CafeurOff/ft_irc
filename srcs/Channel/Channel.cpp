@@ -142,3 +142,5 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
     std::string topicMessage = ":" + sender->getNickname() + "!~" + sender->getUsername() + "@127.0.0.1 TOPIC #" + _name + " :" + _topic + "\n";
     sendAll(topicMessage);
 }
+
+
