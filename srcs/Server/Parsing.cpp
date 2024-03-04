@@ -22,14 +22,14 @@ void	Server::ft_verif_pass(std::string buffer, int client)
 	if (pass.compare(0, _password.length() + 1, _password) == 0)
 	{
 		if (findFd(client) != -1)
-			ft_send_error(462, "PASS", "ERR_ALREADYREGISTRED");
+			ft_send_error(client, 462, "PASS", "ERR_ALREADYREGISTRED");
 		else
 			_client.insert(std::pair<int, Client>(client , Client(client)));
 	}
 	else if (pass.length() == 0) 
-		ft_send_error(461, "PASS", "ERR_NEEDMOREPARAMS");
+		ft_send_error(client, 461, "PASS", "ERR_NEEDMOREPARAMS");
 	else
-		ft_send_error(464, "PASS", "ERR_PASSWDMISMATCH");
+		ft_send_error(client, 464, "PASS", "ERR_PASSWDMISMATCH");
 }
 
 void	Server::ft_nick_receive(std::string buffer, int client)
@@ -39,13 +39,13 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 
 	nick = buffer.substr(5, buffer.length() - 6);
 	if (findFd(client) == -1)
-		ft_send_error(464, "PASS", "ERR_PASSWDMISMATCH");
+		ft_send_error(client, 464, "PASS", "ERR_PASSWDMISMATCH");
 	if (buffer.length() <= 7)
-		ft_send_error(431, "NICK", "ERR_NONICKNAMEGIVEN");
+		ft_send_error(client, 431, "NICK", "ERR_NONICKNAMEGIVEN");
 	if (nick.find_first_of("*:@,!? ", 0) != std::string::npos)
-		ft_send_error(432, "NICK", "ERR_ERRONEUSNICKNAME");
+		ft_send_error(client, 432, "NICK", "ERR_ERRONEUSNICKNAME");
 	if (findFdByNickname(nick) != -1)
-		ft_send_error(433, "NICK", "ERR_NICKNAMEINUSE");
+		ft_send_error(client, 433, "NICK", "ERR_NICKNAMEINUSE");
 	else
 	{
 		user = findClient(client);
@@ -108,7 +108,7 @@ void	Server::ft_invite_receive(std::string buffer, int client)
 	(void)client;
 }
 
-void	Server::ft_send_error(int error, std::string command, std::string type)
+void	Server::ft_send_error(int fd, int error, std::string command, std::string type)
 {
 	std::string error_code;
 	std::string error_message;
@@ -117,5 +117,5 @@ void	Server::ft_send_error(int error, std::string command, std::string type)
 	error_code = SSTR(error);
 	error_message = " :" + type;
 	error_send = ":" + _servername + " " + error_code + " " + command + error_message + "\r\n";
-	send(_new_socket, error_send.c_str(), error_send.length(), 0);
+	send(fd, error_send.c_str(), error_send.length(), 0);
 }
