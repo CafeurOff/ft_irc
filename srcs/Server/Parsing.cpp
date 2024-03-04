@@ -85,6 +85,7 @@ void	Server::ft_quit_user(std::string buffer, int client)
 void	Server::ft_join_receive(std::string buffer, int client)
 {
 	
+	//_channel.insert(std::pair<std::string, Channel>( , Channel(client)));
 	(void)buffer;
 	(void)client;
 }

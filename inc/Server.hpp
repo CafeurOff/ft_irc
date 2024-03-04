@@ -14,10 +14,10 @@
 #include <vector>
 #include <ctime>
 #include "Client.hpp"
-
+#include "Channel.hpp"
 
 class Client;
-//class Channel;
+class Channel;
 
 class Server
 {
@@ -81,6 +81,6 @@ class Server
 		std::string	_servername;
 		typedef void (Server::*CommandFunction)(std::string, int);
 		std::map<std::string, CommandFunction> commandFunctions;
-		//std::map<std::string, Channel> _channel;
+		std::map<std::string, Channel> _channel;
 		std::map<int , Client> _client;
 };

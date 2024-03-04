@@ -6,7 +6,7 @@ CC = c++
 
 # Sources Files
 SRCS_FOLDER = srcs/
-SRCS = srcs/main.cpp srcs/Server/Server.cpp srcs/Client/Client.cpp srcs/Server/Parsing.cpp #srcs/Channel/Channel.cpp
+SRCS = srcs/main.cpp srcs/Server/Server.cpp srcs/Client/Client.cpp srcs/Server/Parsing.cpp srcs/Channel/Channel.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colorsq
