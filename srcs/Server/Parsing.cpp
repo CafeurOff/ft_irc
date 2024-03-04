@@ -21,9 +21,9 @@ void	Server::ft_verif_pass(std::string buffer, int client)
 	pass = buffer.substr(6, buffer.length() - 7);
 	if (pass.compare(0, _password.length() + 1, _password) == 0)
 	{
-		//if (client existe déjà)
-			//ft_send_error(462, "PASS", "ERR_ALREADYREGISTRED");
-		//else
+		if (findFd(client))
+			ft_send_error(462, "PASS", "ERR_ALREADYREGISTRED");
+		else
 			_client.insert(std::pair<int, Client>(client , Client(client)));
 	}
 	else if (pass.length() == 0) 
@@ -35,37 +35,54 @@ void	Server::ft_verif_pass(std::string buffer, int client)
 void	Server::ft_nick_receive(std::string buffer, int client)
 {
 	std::string	nick;
+	Client	*user;
+
 	nick = buffer.substr(5, buffer.length() - 6);
-//	if (don't find a user with the same fd)
-//		ft_send_msg(464, "PASS", "ERR_PASSWDMISMATCH");
+	if (findFd(client) == -1)
+		ft_send_error(464, "PASS", "ERR_PASSWDMISMATCH");
 	if (buffer.length() <= 7)
 		ft_send_error(431, "NICK", "ERR_NONICKNAMEGIVEN");
 	if (nick.find_first_of("*:@,!? ", 0) != std::string::npos)
 		ft_send_error(432, "NICK", "ERR_ERRONEUSNICKNAME");
-//	if (find a user with the same name)
-//		ft_send_error(433, "NICK", "ERR_NICKNAMEINUSE");
-//	else
-//		ft_nick();//set nickname
-	(void)buffer;
-	(void)client;
+	if (findFdByNickname(nick))
+		ft_send_error(433, "NICK", "ERR_NICKNAMEINUSE");
+	else
+	{
+		user = findClient(client);
+		user->setNickname(nick);
+	}
 }
 
 void	Server::ft_user_receive(std::string buffer, int client)
 {
-	std::string	user;
-	user = buffer.substr(5, buffer.length() - 6);
-	user.erase(user.find_first_of(" ", 0), user.length());
-//	if(client existe)
-//		ft_user();
-	(void)buffer;
-	(void)client;
+	std::string	username;
+	std::map<int, Client>::iterator it;
+
+	username = buffer.substr(5, buffer.length() - 6);
+	username.erase(username.find_first_of(" ", 0), username.length());
+	if(findFd(client))
+	{
+			for (it = _client.begin(); it != _client.end(); ++it)
+			{
+				if (it->first == client)
+					_client.erase(it);
+			}
+
+	}
 }
 
 void	Server::ft_quit_user(std::string buffer, int client)
 {
 	std::string msg;
+	std::map<int, Client>::iterator it;
+
 	msg = buffer.substr(6, buffer.length() - 7);
 	//send msg to every channel and delete user in every channel
+	for (it = _client.begin(); it != _client.end(); ++it)
+	{
+		if (it->first == client)
+			_client.erase(it);
+	}
 	(void)buffer;
 	(void)client;
 }

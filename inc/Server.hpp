@@ -43,6 +43,8 @@ class Server
 		std::string ft_getServerName();
 
 		int findFdByNickname(const std::string& nickname);
+		int findFd(int fd);
+		Client *findClient(int fd);
 
 		/*void Channel::addChannel(std::string const &name, Client* client)
 		{
