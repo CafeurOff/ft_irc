@@ -1,6 +1,5 @@
 #include "../../inc/Server.hpp"
 
-
 /*  ft_privmsg
 **  Sent a private message to a user or a channel
 ** @param buffer : the message
@@ -16,7 +15,7 @@ void	Server::ft_privmsg(std::string buffer, int client)
 
     if (buffer.find("#", 0) != std::string::npos)
     {
-        channel = buffer.substr(8, buffer.find(" ", 0) - 8);
+        channel = buffer.substr(9, buffer.find(" ", 0) - 10);
         if (channel.find_first_of(" ", 0) != std::string::npos)
             channel.erase(channel.find_first_of(" ", 0), channel.length());
     }
@@ -28,7 +27,10 @@ void	Server::ft_privmsg(std::string buffer, int client)
 
     if (channel != "")
     {
-        std::cout << "channel" << std::endl;
+        if (findChannelByName(channel) == -1)
+            ft_send_error(client ,401, "ERROR", "ERR_NOSUCHCHANNEL");
+        else
+           std::cout << "Channel found" << std::endl;
     }
     else
     {
@@ -45,10 +47,22 @@ void	Server::ft_privmsg(std::string buffer, int client)
 ** @param message : the message
 */
 
-void    Server::SendMessage(int fd, std::string sender, std::string message)
+void Server::SendMessage(int fd, const std::string& sender, const std::string& message)
 {
-    std::string msg;
+    Client* client = findClient(fd);
+    if (client)
+    {
+        std::string msg = ":" + sender + " PRIVMSG " + client->getNickname() + " :" + message + "\n";
+        send(fd, msg.c_str(), msg.length(), 0);
+    }
+}
 
-    msg = ":" + sender +  " PRIVMSG " + findClient(fd)->getNickname() + " :" + message + "\n";
-    send(fd, msg.c_str(), msg.length(), 0);
+int Server::findChannelByName(const std::string& name)
+{
+    for (std::map<std::string, Channel>::iterator it = _channel.begin(); it != _channel.end(); ++it)
+    {
+        if (it->first == name)
+            return 1;
+    }
+    return -1;
 }

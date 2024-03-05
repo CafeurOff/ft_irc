@@ -1,11 +1,17 @@
 #include "../../inc/Server.hpp"
 
+/*	ft_parse_buffer
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Parse the buffer and call the right function to handle the command
+*/
+
 void	Server::ft_parse_buffer(std::string buffer, int client)
 {
 	ft_getServerName();
 	if (DEBUG) // Just print the buffer and fd of client for debug
 		std::cout << "[FD] --> " << client << " | " << "Buffer :" << buffer << std::endl;
-		
+
 	std::istringstream iss(buffer);
 	std::string command;
 	iss >> command;
@@ -14,6 +20,12 @@ void	Server::ft_parse_buffer(std::string buffer, int client)
 	if (it != commandFunctions.end())
 		(this->*(it->second))(buffer, client);
 }
+
+/*	ft_verif_pass
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Verify the password of the client
+*/
 
 void	Server::ft_verif_pass(std::string buffer, int client)
 {
@@ -26,11 +38,17 @@ void	Server::ft_verif_pass(std::string buffer, int client)
 		else
 			_client.insert(std::pair<int, Client>(client , Client(client)));
 	}
-	else if (pass.length() == 0) 
+	else if (pass.length() == 0)
 		ft_send_error(client, 461, "PASS", "ERR_NEEDMOREPARAMS");
 	else
 		ft_send_error(client, 464, "PASS", "ERR_PASSWDMISMATCH");
 }
+
+/*	ft_nick_receive
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Receive the nickname of the client
+*/
 
 void	Server::ft_nick_receive(std::string buffer, int client)
 {
@@ -53,6 +71,12 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 	}
 }
 
+/*	ft_user_receive
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Receive the username of the client
+*/
+
 void	Server::ft_user_receive(std::string buffer, int client)
 {
 	std::string	username;
@@ -68,19 +92,30 @@ void	Server::ft_user_receive(std::string buffer, int client)
 	}
 }
 
+/*	ft_quit_user
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Quit the user from the server
+*/
+
 void	Server::ft_quit_user(std::string buffer, int client)
 {
 	std::string msg;
-	std::map<int, Client>::iterator it;
+	std::map<int, Client>::iterator it = _client.find(client);
 
-	msg = buffer.substr(6, buffer.length() - 7);
-	//send msg to every channel and delete user in every channel
-	for (it = _client.begin(); it != _client.end(); ++it)
+	if (it != _client.end())
 	{
-		if (it->first == client)
-			_client.erase(it);
+		msg = ":" + it->second.getNickname() + " QUIT :" + buffer.substr(6, buffer.length() - 7) + "\r\n";
+		// send to all clients
+		_client.erase(it);
 	}
 }
+
+/*	ft_join_receive
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Join the client to a channel
+*/
 
 void	Server::ft_join_receive(std::string buffer, int client)
 {
@@ -96,7 +131,7 @@ void	Server::ft_join_receive(std::string buffer, int client)
 		}
 		else
 		{
-			channel = buffer.substr(6, buffer.length() - 6);
+			channel = buffer.substr(6, buffer.length() - 7);
 			_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, findClient(client))));
 		}
 	}
@@ -104,11 +139,23 @@ void	Server::ft_join_receive(std::string buffer, int client)
 	(void)client;
 }
 
+/*	ft_mode_receive
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Change the mode of the client
+*/
+
 void	Server::ft_mode_receive(std::string buffer, int client)
 {
 	(void)buffer;
 	(void)client;
 }
+
+/*	ft_topic_receive
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Change the topic of the channel
+*/
 
 void	Server::ft_topic_receive(std::string buffer, int client)
 {
@@ -116,11 +163,25 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 	(void)client;
 }
 
+/*	ft_invite_receive
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Invite a user to a channel
+*/
+
 void	Server::ft_invite_receive(std::string buffer, int client)
 {
 	(void)buffer;
 	(void)client;
 }
+
+/*	ft_send_error
+**	@param fd : the fd of the client
+**	@param error : the error code
+**	@param command : the command
+**	@param type : the type of error
+**	Send an error to the client
+*/
 
 void	Server::ft_send_error(int fd, int error, std::string command, std::string type)
 {

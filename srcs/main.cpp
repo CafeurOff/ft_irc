@@ -3,6 +3,12 @@
 #include "../inc/Client.hpp"
 #include "../inc/Channel.hpp"
 
+/*	Main
+**	@param ac : the number of arguments
+**	@param av : the arguments
+**	Launch the server
+*/
+
 int	main(int ac, char **av)
 {
 	std::string args;
@@ -19,10 +25,15 @@ int	main(int ac, char **av)
 	return (0);
 }
 
+/*	ft_launch_server
+**	@param av : the arguments
+**	Launch the server
+*/
+
 void	ft_launch_server(char **av)
 {
 	Server server(av);
-	server.init();
+	server.Init();
 	while (1)
 		continue;
 }

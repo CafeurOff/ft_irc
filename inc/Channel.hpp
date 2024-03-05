@@ -30,18 +30,19 @@ class Channel
 		~Channel();
 
 		const std::string &getName() const;
-		
+
 		static void sendMessage(Client* client, const std::string& msg);
 		static void createChannel(const std::string& name, Client* creator);
 		void sendNumericResponse(Client* client, const std::string& code, const std::string& param1, const std::string& param2);
-		
+
 		void sendAll(const std::string& message);
-		
+
 		void kick(Client* creator, const std::string& targetNickname);
 		void addUser(Client* user);
 		void removeUser(Client* user);
 		void invite(Client* sender, Client* newUser);
 		void topic(Client* sender, const std::string& newTopic);
+		
 
 		void checkMode(std::string **mess);
 		void modifMode(char modeSign, char modeChar, const std::string &param);
