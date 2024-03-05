@@ -87,8 +87,14 @@ void Channel::kick(Client* creator, const std::string& targetNickname)
 	}
 }
 
-void Channel::addUser(Client* user)
+void Channel::addUser(Client* user, std::string password)
 {
+	if (password != _password)
+	{
+		ft_send_error(user, 475, "JOIN", "ERR_BADCHANNELKEY ");
+		return;
+	}
+	
 	if (_limitUser == true && _limit <= _nUser - 1)
 		ft_send_error(client, 471, "JOIN", "ERR_CHANNELISFULL ");
 	else if (_inviteOnly == false)
