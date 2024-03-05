@@ -34,6 +34,7 @@ class Channel
 		static void sendMessage(Client* client, const std::string& msg);
 		static void createChannel(const std::string& name, Client* creator);
 		void sendNumericResponse(Client* client, const std::string& code, const std::string& param1, const std::string& param2);
+		void sendAll(const std::string& message, int fd);
 
 		void sendAll(const std::string& message);
 

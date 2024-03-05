@@ -246,3 +246,12 @@ void Channel::setPassword(std::string param)
 	_passwordUse = true;
 	_password = param;
 }
+
+void Channel::sendAll(const std::string& message, int fd)
+{
+	for (std::map<std::string, Client*>::const_iterator it = _regulars.begin(); it != _regulars.end(); ++it)
+	{
+		if (it->second->getFd() != fd)
+			sendMessage(it->second, message);
+	}
+}
