@@ -20,6 +20,7 @@ class Channel
 		bool _passwordUse;
 		bool _restricTopic;
 		int _nUser;
+		int	_limit;
 		std::map<std::string, Client*> _operators;
 		std::map<std::string, Client*> _regulars;
 		std::map<std::string, Client*> _invited;

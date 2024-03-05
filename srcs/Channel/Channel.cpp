@@ -1,7 +1,7 @@
 #include "../../inc/Channel.hpp"
 
 Channel::Channel(const std::string name, Client *creator) : _name(name), _password(""), _topic(""), _inviteOnly(false),
-			_restrictTopic(true), _limitUser(false), _passwordUse(false), _nUser(0)
+			_restrictTopic(true), _limitUser(false), _passwordUse(false), _nUser(1), _limit(0)
 {
 	_regulars.insert(std::pair<std::string, Client*>(creator->getNickname() , creator));
 	_operators.insert(std::pair<std::string, Client*>(creator->getNickname() , creator));
@@ -20,7 +20,7 @@ Channel::Channel(const std::string name, Client *creator) : _name(name), _passwo
 }
 
 Channel::Channel(std::string name, std::string password, Client *creator) : _name(name), _password(password), _topic(""), _inviteOnly(false),
-			_restrictTopic(true), _limitUser(false), _passwordUse(true), _nUser(0)
+			_restrictTopic(true), _limitUser(false), _passwordUse(true), _nUser(1), _limit(0)
 {
 	_operators[creator->getNickname()] = creator;
 	_regulars[creator->getNickname()] = creator;
@@ -89,16 +89,15 @@ void Channel::kick(Client* creator, const std::string& targetNickname)
 
 void Channel::addUser(Client* user)
 {
-	if (_regulars.find(user->getNickname()) != _regulars.end())
-	{
-		//user already in the channel
-	}
+	if (_limitUser == true && _limit <= _nUser - 1)
+		ft_send_error(client, 471, "JOIN", "ERR_CHANNELISFULL ");
 	else if (_inviteOnly == false)
 	{
 		_regulars.insert(std::pair<std::string, Client*>(user->getNickname() , user));
 		_nUser++;
 	}
-	//else error invite only
+	else
+		ft_send_error(client, 473, "JOIN", "ERR_INVITEONLYCHAN ");
 }
 
 void Channel::removeUser(Client* user)
