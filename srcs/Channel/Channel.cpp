@@ -98,7 +98,9 @@ void Channel::addUser(Client* user, std::string password)
 		_regulars.insert(std::pair<std::string, Client*>(user->getNickname() , user));
 		_nUser++;
 		sendMessage(user, "JOIN #" + _name + "\n");
-		sendNumericResponse(user, "331", user->getNickname(), "RPL_NOTOPIC");
+		if (_restrictTopic == false)
+			sendNumericResponse(user, "331", user->getNickname(), "RPL_NOTOPIC");
+		//else topic
 
 	}
 	else
@@ -108,6 +110,7 @@ void Channel::addUser(Client* user, std::string password)
 void Channel::removeUser(Client* user)
 {
 	_regulars.erase(user->getNickname());
+	_operators.erase(user->getNickname());
 	_nUser--;
 }
 
@@ -119,14 +122,12 @@ void Channel::invite(Client* sender, Client* newUser)
 		sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
 		return;
 	}
-
 	//  Check if the target user is already on the channel
 	if (_regulars.find(newUser->getNickname()) != _regulars.end())
 	{
 		sendNumericResponse(sender, "443", sender->getNickname(), newUser->getNickname()); // ERR_USERONCHANNEL
 		return;
 	}
-
 	// sens a message to the target user asking for him to join the channel
 	if (newUser != NULL)
 	{
@@ -143,29 +144,24 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
 		sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
 		return;
 	}
-
 	if (_restrictTopic == false)
 		return ;
-
 	// If no new topic is specified, send the current topic to the sender
 	if (newTopic.empty()) {
 		sendNumericResponse(sender, "332", sender->getNickname(), _name); // RPL_TOPIC
 		sendNumericResponse(sender, "333", sender->getNickname(), _name); // RPL_TOPICWHOTIME
 		return;
 	}
-
 	// Check if the new topic is too long
 	if (newTopic.size() > 80) {
 		sendNumericResponse(sender, "409", sender->getNickname(), _name); // ERR_TOOLONG
 		return;
 	}
-
 	// If everything is fine, change the topic and notify all users about this event
 	_topic = newTopic;
 	std::string topicMessage = ":" + sender->getNickname() + "!~" + sender->getUsername() + "@127.0.0.1 TOPIC #" + _name + " :" + _topic + "\n";
 	sendAll(topicMessage);
 }
-
 
 void Channel::checkMode(std::string **mess)
 {
@@ -198,7 +194,7 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
 		else if (modeChar == 't') //Definir les restrictions de la commande TOPIC pour les operateurs
 		{
 			if (_restrictTopic == false)
-				_restricTopic = true;
+				_restrictTopic = true;
 		}
 		else if (modeChar == 'k') //Definir un mot de passe
 		{

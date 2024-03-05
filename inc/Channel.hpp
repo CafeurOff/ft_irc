@@ -18,7 +18,6 @@ class Channel
 		bool _restrictTopic;
 		bool _limitUser;
 		bool _passwordUse;
-		bool _restricTopic;
 		int _nUser;
 		int	_limit;
 		std::map<std::string, Client*> _operators;
