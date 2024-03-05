@@ -39,7 +39,7 @@ class Channel
 		void sendAll(const std::string& message);
 
 		void kick(Client* creator, const std::string& targetNickname);
-		void addUser(Client* user);
+		void addUser(Client* user, std::string password);
 		void removeUser(Client* user);
 		void invite(Client* sender, Client* newUser);
 		void topic(Client* sender, const std::string& newTopic);

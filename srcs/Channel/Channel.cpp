@@ -78,7 +78,7 @@ void Channel::kick(Client* creator, const std::string& targetNickname)
 	else if (targetOperator != _operators.end())
 		sendMessage(creator, ":127.0.0.1 Error :You can't kick an operator\n");
 	else if (_operators.find(creator->getNickname()) == _operators.end())
-		sendNumericResponse(creator, "482", creator->getNickname(), ""); // ERR_CHANOPRIVSNEEDED // you doesn't have the operator right
+		sendNumericResponse(creator, "482", creator->getNickname(), "ERR_CHANOPRIVSNEEDED"); // you doesn't have the operator right
 	else
 	{
 		std::string kickMessage = ":" + creator->getNickname() + "!~" + creator->getUsername() + "@127.0.0.1 KICK #" + _name + ' ' + targetRegular->second->getNickname() + " :\n";
@@ -89,21 +89,20 @@ void Channel::kick(Client* creator, const std::string& targetNickname)
 
 void Channel::addUser(Client* user, std::string password)
 {
-	if (password != _password)
-	{
-		ft_send_error(user, 475, "JOIN", "ERR_BADCHANNELKEY ");
-		return;
-	}
-	
-	if (_limitUser == true && _limit <= _nUser - 1)
-		ft_send_error(client, 471, "JOIN", "ERR_CHANNELISFULL ");
+	if (password != _password && _passwordUse == true)
+		sendNumericResponse(user, "475", user->getNickname(), "ERR_BADCHANNELKEY");
+	else if (_limitUser == true && _limit <= _nUser - 1)
+		sendNumericResponse(user, "471", user->getNickname(), "ERR_CHANNELISFULL");
 	else if (_inviteOnly == false)
 	{
 		_regulars.insert(std::pair<std::string, Client*>(user->getNickname() , user));
 		_nUser++;
+		sendMessage(user, "JOIN #" + _name + "\n");
+		sendNumericResponse(user, "331", user->getNickname(), "RPL_NOTOPIC");
+
 	}
 	else
-		ft_send_error(client, 473, "JOIN", "ERR_INVITEONLYCHAN ");
+		sendNumericResponse(user, "473", user->getNickname(), "ERR_INVITEONLYCHAN");
 }
 
 void Channel::removeUser(Client* user)

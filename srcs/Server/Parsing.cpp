@@ -129,24 +129,25 @@ void	Server::ft_join_receive(std::string buffer, int client)
 		{
 			channel = buffer.substr(6, buffer.find(" ", 5) - 6);
 			password = buffer.substr(buffer.find(" ", 5), buffer.length() - buffer.find(" ", 5));
-			chan = findClient(channel);
+			chan = findChannel(channel);
 			if (!chan)
 				_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, password, findClient(client))));
 			else
-				chan->addUser(findClient(client));
-		}
+				chan->addUser(findClient(client), password);
+		}	
 		else
 		{
 			channel = buffer.substr(6, buffer.length() - 7);
-			chan = findClient(channel);
+			chan = findChannel(channel);
 			if (!chan)
 				_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, findClient(client))));
 			else
-				chan->addUser(findClient(client));
+			{
+				chan->addUser(findClient(client), "");
+				std::cout << "3" << std::endl;			
+			}
 		}
 	}
-	(void)buffer;
-	(void)client;
 }
 
 /*	ft_mode_receive
