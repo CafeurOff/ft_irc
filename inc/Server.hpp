@@ -43,6 +43,7 @@ class Server
 		/* Utils */
 		void		ft_send_error(int fd, int error, std::string command, std::string type);
 		void		SendMessage(int fd, const std::string& sender, const std::string& message);
+		void 		SendMessageToChannel(const std::string& channel, Client* sender, const std::string& message);
 		std::string ft_getServerName();
 		int 		findFdByNickname(const std::string& nickname);
 		int 		findFd(int fd);
