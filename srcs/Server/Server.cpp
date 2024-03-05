@@ -1,5 +1,10 @@
 #include "../../inc/Server.hpp"
 
+/*	Constructor
+**	@param av : the arguments of the server
+**	Set all commands for my map
+*/
+
 Server::Server(char **av)
 {
 	_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -18,11 +23,21 @@ Server::Server(char **av)
 	commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
 }
 
+/*	Destructor
+**	Close the socket
+*/
+
 Server::~Server()
 {
 	close(_socket);
 	close(_new_socket);
 }
+
+/*	Launch
+**	Launch the server
+**	Accept the clients and read the buffer
+**  Manage more than one client
+*/
 
 void	Server::Launch()
 {
@@ -73,7 +88,12 @@ void	Server::Launch()
 	}
 }
 
-void	Server::init()
+/*	Init
+**	Init the server
+**	Bind the socket and listen
+*/
+
+void	Server::Init()
 {
 	struct sockaddr_in address;
 
@@ -117,6 +137,12 @@ std::string		Server::ft_getServerName()
 	return (_servername);
 }
 
+/*	FindFdByNickname
+**	Find the file descriptor by the nickname of the client
+**	@param nickname : the nickname of the client
+**	@return the file descriptor
+*/
+
 int Server::findFdByNickname(const std::string& nickname)
 {
 	std::map<int, Client>::iterator it;
@@ -128,6 +154,12 @@ int Server::findFdByNickname(const std::string& nickname)
 	return (-1);
 }
 
+/*	FindFd
+**	Find the file descriptor
+**	@param fd : the file descriptor
+**	@return 1 if the file descriptor is found, -1 if not
+*/
+
 int Server::findFd(int fd)
 {
 	std::map<int, Client>::iterator it;
@@ -138,6 +170,12 @@ int Server::findFd(int fd)
 	}
 	return (-1);
 }
+
+/*	FindClient
+**	Find the client by the file descriptor
+**	@param fd : the file descriptor
+**	@return the client
+*/
 
 Client *Server::findClient(int fd)
 {

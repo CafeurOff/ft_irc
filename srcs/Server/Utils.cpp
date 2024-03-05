@@ -1,6 +1,5 @@
 #include "../../inc/Server.hpp"
 
-
 /*  ft_privmsg
 **  Sent a private message to a user or a channel
 ** @param buffer : the message
@@ -16,7 +15,7 @@ void	Server::ft_privmsg(std::string buffer, int client)
 
     if (buffer.find("#", 0) != std::string::npos)
     {
-        channel = buffer.substr(8, buffer.find(" ", 0) - 8);
+        channel = buffer.substr(9, buffer.find(" ", 0) - 10);
         if (channel.find_first_of(" ", 0) != std::string::npos)
             channel.erase(channel.find_first_of(" ", 0), channel.length());
     }
@@ -28,7 +27,7 @@ void	Server::ft_privmsg(std::string buffer, int client)
 
     if (channel != "")
     {
-        std::cout << "channel" << std::endl;
+        // Check if the channel exists
     }
     else
     {
@@ -37,7 +36,6 @@ void	Server::ft_privmsg(std::string buffer, int client)
         SendMessage(findFdByNickname(receiver), user->getNickname(), message);
     }
 }
-
 
 /*  SendMessage
 **  Sent a message to a user

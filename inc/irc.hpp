@@ -19,10 +19,21 @@
 # include <signal.h>
 # include <vector>
 # include <netdb.h>
+# include <poll.h>
+
+/* SSTR
+** @param x : the value
+** @return the value in string
+** Function to convert a value to a string
+*/
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
-# include <poll.h>
+/*	IRC
+**	@param ac : the number of arguments
+**	@param av : the arguments
+**	Launch the server
+*/
 
 void	ft_launch_server(char **av);

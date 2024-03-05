@@ -25,9 +25,10 @@ class Server
 		Server(char **av);
 		~Server();
 
-		void		init();
-		void		Launch();
-
+		/* Main */
+		void	Init();
+		void	Launch();
+		/* Parsing and Commands */
 		void	ft_parse_buffer(std::string buffer, int client);
 		void	ft_verif_pass(std::string buffer, int client);
 		void	ft_nick_receive(std::string buffer, int client);
@@ -39,15 +40,13 @@ class Server
 		void	ft_invite_receive(std::string buffer, int client);
 		void	ft_privmsg(std::string buffer, int client);
 
-
-		void	ft_send_error(int fd, int error, std::string command, std::string type);
-		void	SendMessage(int fd, const std::string& sender, const std::string& message);
-
+		/* Utils */
+		void		ft_send_error(int fd, int error, std::string command, std::string type);
+		void		SendMessage(int fd, const std::string& sender, const std::string& message);
 		std::string ft_getServerName();
-
-		int findFdByNickname(const std::string& nickname);
-		int findFd(int fd);
-		Client *findClient(int fd);
+		int 		findFdByNickname(const std::string& nickname);
+		int 		findFd(int fd);
+		Client 		*findClient(int fd);
 
 		/*void Channel::addChannel(std::string const &name, Client* client)
 		{
@@ -72,9 +71,7 @@ class Server
 			_channels.insert(std::pair(name, channel1));
 			channel1.createChannel(name, client);
 		}*/
-
 	private:
-
 		int		_port;
 		int 	_opt;
 		int		_socket;

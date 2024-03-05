@@ -43,12 +43,12 @@ Channel::~Channel()
 
 }
 
-void Channel::sendMessage(Client* client, const std::string& msg) 
+void Channel::sendMessage(Client* client, const std::string& msg)
 {
 	send(client->getFd(), msg.c_str(), msg.size(), MSG_CONFIRM); // MSG_CONFIRM is a flag to tell the receiver that the data was received correctly
 }
 
-const std::string& Channel::getName() const 
+const std::string& Channel::getName() const
 {
 	return (_name);
 }
@@ -110,26 +110,26 @@ void Channel::removeUser(Client* user)
 void Channel::invite(Client* sender, Client* newUser)
 {
 	// Check if the sender is an operator of the channel
-	if (_operators.find(sender->getNickname()) == _operators.end()) 
+	if (_operators.find(sender->getNickname()) == _operators.end())
 	{
 		sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
 		return;
 	}
 
 	//  Check if the target user is already on the channel
-	if (_regulars.find(newUser->getNickname()) != _regulars.end()) 
+	if (_regulars.find(newUser->getNickname()) != _regulars.end())
 	{
 		sendNumericResponse(sender, "443", sender->getNickname(), newUser->getNickname()); // ERR_USERONCHANNEL
 		return;
 	}
 
 	// sens a message to the target user asking for him to join the channel
-	if (newUser != NULL) 
+	if (newUser != NULL)
 	{
 		std::string inviteMessage = ":" + sender->getNickname() + " INVITE " + newUser->getNickname() + " :" + _name + "\n";
 		sendMessage(newUser, inviteMessage);
-	} 
-	else 
+	}
+	else
 		sendNumericResponse(sender, "401", sender->getNickname(), newUser->getNickname()); // ERR_NOSUCHNICK
 }
 
@@ -236,7 +236,7 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
 		}
 		else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
 		{
-			
+
 		}
 	}
 }
