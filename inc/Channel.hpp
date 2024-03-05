@@ -48,4 +48,7 @@ class Channel
 		void checkMode(std::string **mess);
 		void modifMode(char modeSign, char modeChar, const std::string &param);
 		void setPassword(std::string param);
+
+		void userJoin(Client *user, std::string password);
+		void sendAllUser(Client *user);
 };

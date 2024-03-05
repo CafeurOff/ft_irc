@@ -107,6 +107,54 @@ void Channel::addUser(Client* user, std::string password)
 		sendNumericResponse(user, "473", user->getNickname(), "ERR_INVITEONLYCHAN");
 }
 
+void Channel::userJoin(Client *user, std::string password) {
+    if (_invited.find(user->getNickname()) == _invited.end()) {
+        addUser(user, password);
+        return;
+    } else {
+        _invited.erase(user->getNickname());
+    }
+
+    if (user) {
+        sendAllUser(user);
+        std::string msg = ":" + user->getNickname() + "!~" + user->getUsername()[0] + "@127.0.0.1 JOIN #" + _name + "\n"; // RPL_JOIN
+        sendMessage(user, msg);
+
+        if (_topic != "") {
+            msg = ":127.0.0.1 332 " + user->getNickname() + " #" + _name + " :" + _topic + "\n"; // RPL_TOPIC
+        } else {
+            msg = ":127.0.0.1 331 " + user->getNickname() + " #" + _name + " :No topic set\n"; // RPL_NOTOPIC
+        }
+        sendMessage(user, msg);
+
+        if (_topic != "") {
+            msg = ":127.0.0.1 333 " + user->getNickname() + " #" + _name + ' ' + _topicsetter + ' ' + _topicdate + '\n'; // RPL_TOPICWHOTIME
+            sendMessage(user, msg);
+        }
+
+        msg = ":127.0.0.1 353 " + user->getNickname() + " = #" + _name + " :"; // RPL_NAMREPLY
+        for (std::map<std::string, Client *>::iterator it = _regulars.begin(); it != _regulars.end(); it++) {
+            if (_operators.find(it->second->getNickname()) != _operators.end()) {
+                msg += "@";
+            }
+            msg += it->second->getNickname() + " ";
+        }
+        msg += user->getNickname() + "\n";
+        sendMessage(user, msg);
+
+        msg = ":127.0.0.1 366 " + user->getNickname() + " #" + _name + " :End of /NAMES list.\n"; // RPL_ENDOFNAMES
+        sendMessage(user, msg);
+        _regulars[user->getNickname()] = user;
+    }
+}
+
+void	Channel::sendAllUser(Client *user)
+{
+	std::string msg = ":" + user->getNickname() + "!~" + user->getUsername()[0] + "@127.0.0.1 JOIN :#" + _name + "\n";
+	for (std::map<std::string, Client *>::iterator it = _regulars.begin(); it != _regulars.end(); it++)
+		send(it->second->getFd(), msg.c_str(), msg.size(), MSG_CONFIRM);
+}
+
 void Channel::removeUser(Client* user)
 {
 	_regulars.erase(user->getNickname());
