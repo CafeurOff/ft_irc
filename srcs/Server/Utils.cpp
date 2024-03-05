@@ -61,7 +61,7 @@ void Server::SendMessageToChannel(const std::string& channel, Client* sender, co
 {
     std::map<std::string, Channel>::iterator it = _channel.find(channel);
     if (it != _channel.end())
-        it->second.sendAll(":" + sender->getNickname() + " PRIVMSG #" + channel + " :" + message + "\n", sender->getFd());
+        it->second.SendAllFD(":" + sender->getNickname() + " PRIVMSG #" + channel + " :" + message + "\n", sender->getFd());
 }
 
 int Server::findChannelByName(const std::string& name)

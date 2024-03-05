@@ -49,6 +49,7 @@ class Server
 		int 		findFd(int fd);
 		Client 		*findClient(int fd);
 		int 		findChannelByName(const std::string& name);
+		Channel 	*findChannel(std::string name);
 
 		/*void Channel::addChannel(std::string const &name, Client* client)
 		{

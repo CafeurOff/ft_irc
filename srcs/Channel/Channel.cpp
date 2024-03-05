@@ -1,7 +1,7 @@
 #include "../../inc/Channel.hpp"
 
 Channel::Channel(const std::string name, Client *creator) : _name(name), _password(""), _topic(""), _inviteOnly(false),
-			_restrictTopic(true), _limitUser(false), _passwordUse(false), _nUser(0)
+			_restrictTopic(true), _limitUser(false), _passwordUse(false), _nUser(1), _limit(0)
 {
 	_regulars.insert(std::pair<std::string, Client*>(creator->getNickname() , creator));
 	_operators.insert(std::pair<std::string, Client*>(creator->getNickname() , creator));
@@ -20,7 +20,7 @@ Channel::Channel(const std::string name, Client *creator) : _name(name), _passwo
 }
 
 Channel::Channel(std::string name, std::string password, Client *creator) : _name(name), _password(password), _topic(""), _inviteOnly(false),
-			_restrictTopic(true), _limitUser(false), _passwordUse(true), _nUser(0)
+			_restrictTopic(true), _limitUser(false), _passwordUse(true), _nUser(1), _limit(0)
 {
 	_operators[creator->getNickname()] = creator;
 	_regulars[creator->getNickname()] = creator;
@@ -78,7 +78,7 @@ void Channel::kick(Client* creator, const std::string& targetNickname)
 	else if (targetOperator != _operators.end())
 		sendMessage(creator, ":127.0.0.1 Error :You can't kick an operator\n");
 	else if (_operators.find(creator->getNickname()) == _operators.end())
-		sendNumericResponse(creator, "482", creator->getNickname(), ""); // ERR_CHANOPRIVSNEEDED // you doesn't have the operator right
+		sendNumericResponse(creator, "482", creator->getNickname(), "ERR_CHANOPRIVSNEEDED"); // you doesn't have the operator right
 	else
 	{
 		std::string kickMessage = ":" + creator->getNickname() + "!~" + creator->getUsername() + "@127.0.0.1 KICK #" + _name + ' ' + targetRegular->second->getNickname() + " :\n";
@@ -87,18 +87,22 @@ void Channel::kick(Client* creator, const std::string& targetNickname)
 	}
 }
 
-void Channel::addUser(Client* user)
+void Channel::addUser(Client* user, std::string password)
 {
-	if (_regulars.find(user->getNickname()) != _regulars.end())
-	{
-		//user already in the channel
-	}
+	if (password != _password && _passwordUse == true)
+		sendNumericResponse(user, "475", user->getNickname(), "ERR_BADCHANNELKEY");
+	else if (_limitUser == true && _limit <= _nUser - 1)
+		sendNumericResponse(user, "471", user->getNickname(), "ERR_CHANNELISFULL");
 	else if (_inviteOnly == false)
 	{
 		_regulars.insert(std::pair<std::string, Client*>(user->getNickname() , user));
 		_nUser++;
+		sendMessage(user, "JOIN #" + _name + "\n");
+		sendNumericResponse(user, "331", user->getNickname(), "RPL_NOTOPIC");
+
 	}
-	//else error invite only
+	else
+		sendNumericResponse(user, "473", user->getNickname(), "ERR_INVITEONLYCHAN");
 }
 
 void Channel::removeUser(Client* user)
@@ -247,7 +251,7 @@ void Channel::setPassword(std::string param)
 	_password = param;
 }
 
-void Channel::sendAll(const std::string& message, int fd)
+void Channel::SendAllFD(const std::string& message, int fd)
 {
 	for (std::map<std::string, Client*>::const_iterator it = _regulars.begin(); it != _regulars.end(); ++it)
 	{

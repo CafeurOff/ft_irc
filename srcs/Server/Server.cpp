@@ -188,3 +188,13 @@ Client *Server::findClient(int fd)
 	return (NULL);
 }
 
+Channel *Server::findChannel(std::string name)
+{
+	std::map<std::string, Channel>::iterator it;
+	for (it = _channel.begin(); it != _channel.end(); ++it)
+	{
+		if (it->first == name)
+			return (&it->second);
+	}
+	return (NULL);
+}
