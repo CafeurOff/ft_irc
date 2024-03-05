@@ -27,7 +27,10 @@ void	Server::ft_privmsg(std::string buffer, int client)
 
     if (channel != "")
     {
-        // Check if the channel exists
+        if (findChannelByName(channel) == -1)
+            ft_send_error(client ,401, "ERROR", "ERR_NOSUCHCHANNEL");
+        else
+           std::cout << "Channel found" << std::endl;
     }
     else
     {
@@ -52,4 +55,14 @@ void Server::SendMessage(int fd, const std::string& sender, const std::string& m
         std::string msg = ":" + sender + " PRIVMSG " + client->getNickname() + " :" + message + "\n";
         send(fd, msg.c_str(), msg.length(), 0);
     }
+}
+
+int Server::findChannelByName(const std::string& name)
+{
+    for (std::map<std::string, Channel>::iterator it = _channel.begin(); it != _channel.end(); ++it)
+    {
+        if (it->first == name)
+            return 1;
+    }
+    return -1;
 }
