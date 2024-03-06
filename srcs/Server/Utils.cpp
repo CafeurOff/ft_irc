@@ -57,12 +57,25 @@ void Server::SendMessage(int fd, const std::string& sender, const std::string& m
     }
 }
 
+/*  SendMessageToChannel
+**  Sent a message to a channel
+** @param channel : the name of the channel
+** @param sender : the client who sent the message
+** @param message : the message
+*/
+
 void Server::SendMessageToChannel(const std::string& channel, Client* sender, const std::string& message)
 {
     std::map<std::string, Channel>::iterator it = _channel.find(channel);
     if (it != _channel.end())
         it->second.SendAllFD(":" + sender->getNickname() + " PRIVMSG #" + channel + " :" + message + "\n", sender->getFd());
 }
+
+/*  findChannelByName
+**  Find the channel by the name
+** @param name : the name of the channel
+** @return 1 if the channel is found, -1 if not
+*/
 
 int Server::findChannelByName(const std::string& name)
 {
@@ -72,4 +85,15 @@ int Server::findChannelByName(const std::string& name)
             return 1;
     }
     return -1;
+}
+
+/*  ft_welcome
+**  Sent the welcome message to the client
+** @param fd : the file descriptor of the client
+*/
+
+void Server::ft_welcome(int fd)
+{
+    std::string welcome = findClient(fd)->getNickname() + " :Welcome to the " + ft_getServerName() + " Network, " + findClient(fd)->getNickname() + "!" + findClient(fd)->getUsername() + "@" + ft_getServerName() + "\n";
+    send(fd, welcome.c_str(), welcome.length(), 0);
 }

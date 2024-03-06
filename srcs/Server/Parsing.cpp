@@ -69,6 +69,7 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 		user = findClient(client);
 		user->setNickname(nick);
 	}
+	ft_welcome(client);
 }
 
 /*	ft_user_receive
@@ -134,7 +135,7 @@ void	Server::ft_join_receive(std::string buffer, int client)
 				_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, password, findClient(client))));
 			else
 				chan->addUser(findClient(client), password);
-		}	
+		}
 		else
 		{
 			channel = buffer.substr(6, buffer.length() - 7);
@@ -195,6 +196,34 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 {
 	(void)buffer;
 	(void)client;
+}
+
+/*	ft_kick_receive
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Kick a user from a channel
+*/
+
+void	Server::ft_kick_receive(std::string buffer, int client)
+{
+	std::string	channel;
+	std::string	user;
+	Channel	*chan;
+
+	if (buffer.find("#", 0) != std::string::npos)
+		ft_send_error(client, 461, "KICK", "ERR_NEEDMOREPARAMS");
+	if (buffer.find(":", 0) != std::string::npos)
+	{
+		channel = buffer.substr(6, buffer.find(" ", 5) - 6);
+		user = buffer.substr(buffer.find(" ", 5) + 1, buffer.find(" ", buffer.find(" ", 5) + 1) - buffer.find(" ", 5) - 1);
+	}
+	else
+	{
+		channel = buffer.substr(6, buffer.find(" ", 5) - 6);
+		user = buffer.substr(buffer.find(" ", 5) + 1, buffer.length() - buffer.find(" ", 5) - 2);
+	}
+	chan = findChannel(channel);
+	chan->kick(findClient(client), user);
 }
 
 /*	ft_send_error

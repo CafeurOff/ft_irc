@@ -21,6 +21,7 @@ Server::Server(char **av)
     commandFunctions["TOPIC"] = &Server::ft_topic_receive;
     commandFunctions["INVITE"] = &Server::ft_invite_receive;
 	commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
+	commandFunctions["KICK"] = &Server::ft_kick_receive;
 }
 
 /*	Destructor
@@ -48,7 +49,7 @@ void	Server::Launch()
 
 	while (1)
 	{
-		int rc = poll(pstruct, nb_client + 1, 5000);
+		int rc = poll(pstruct, nb_client + 1, 0);
 		if (rc > 0)
 		{
 			if (pstruct[0].revents & POLLIN)
