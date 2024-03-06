@@ -18,7 +18,6 @@ class Channel
 		bool _restrictTopic;
 		bool _limitUser;
 		bool _passwordUse;
-		bool _restricTopic;
 		int _nUser;
 		int	_limit;
 		std::map<std::string, Client*> _operators;
@@ -49,4 +48,6 @@ class Channel
 		void checkMode(std::string **mess);
 		void modifMode(char modeSign, char modeChar, const std::string &param);
 		void setPassword(std::string param);
+
+		void sendAllUser(Client *user);
 };
