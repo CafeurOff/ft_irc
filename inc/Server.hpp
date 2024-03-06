@@ -28,6 +28,7 @@ class Server
 		/* Main */
 		void	Init();
 		void	Launch();
+
 		/* Parsing and Commands */
 		void	ft_parse_buffer(std::string buffer, int client);
 		void	ft_verif_pass(std::string buffer, int client);
@@ -38,18 +39,22 @@ class Server
 		void	ft_mode_receive(std::string buffer, int client);
 		void	ft_topic_receive(std::string buffer, int client);
 		void	ft_invite_receive(std::string buffer, int client);
+		void	ft_kick_receive(std::string buffer, int client);
 		void	ft_privmsg(std::string buffer, int client);
 
 		/* Utils */
-		void		ft_send_error(int fd, int error, std::string command, std::string type);
-		void		SendMessage(int fd, const std::string& sender, const std::string& message);
-		void 		SendMessageToChannel(const std::string& channel, Client* sender, const std::string& message);
+		Channel 	*findChannel(std::string name);
+		Client 		*findClient(int fd);
 		std::string ft_getServerName();
 		int 		findFdByNickname(const std::string& nickname);
 		int 		findFd(int fd);
-		Client 		*findClient(int fd);
 		int 		findChannelByName(const std::string& name);
-		Channel 	*findChannel(std::string name);
+		void		ft_welcome(int fd);
+
+		/* Sender */
+		void		ft_send_error(int fd, int error, std::string command, std::string type);
+		void		SendMessage(int fd, const std::string& sender, const std::string& message);
+		void 		SendMessageToChannel(const std::string& channel, Client* sender, const std::string& message);
 
 		/*void Channel::addChannel(std::string const &name, Client* client)
 		{
