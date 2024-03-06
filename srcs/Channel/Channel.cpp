@@ -77,7 +77,7 @@ void Channel::kick(Client* creator, const std::string& targetNickname)
 		sendNumericResponse(creator, "442", creator->getNickname(), _name);
 	else if (targetOperator != _operators.end())
 		sendMessage(creator, ":127.0.0.1 Error :You can't kick an operator\n");
-	else if (_operators.find(creator->getNickname()) == _operators.end())
+	else if (_operators.find(creator->getNickname()) == _operators.end())//verif target est dans le chan
 		sendNumericResponse(creator, "482", creator->getNickname(), "ERR_CHANOPRIVSNEEDED"); // you doesn't have the operator right
 	else
 	{
@@ -89,6 +89,7 @@ void Channel::kick(Client* creator, const std::string& targetNickname)
 
 void Channel::addUser(Client* user, std::string password)
 {
+	std::string	msg;
 	if (password != _password && _passwordUse == true)
 		sendNumericResponse(user, "475", user->getNickname(), "ERR_BADCHANNELKEY");
 	else if (_limitUser == true && _limit <= _nUser - 1)
@@ -97,55 +98,28 @@ void Channel::addUser(Client* user, std::string password)
 	{
 		_regulars.insert(std::pair<std::string, Client*>(user->getNickname() , user));
 		_nUser++;
-		sendMessage(user, "JOIN #" + _name + "\n");
+		sendAllUser(user);
 		if (_restrictTopic == false)
-			sendNumericResponse(user, "331", user->getNickname(), "RPL_NOTOPIC");
-		//else topic
+			msg = ":127.0.0.1 331 " + user->getNickname() + " #" + _name + " :No topic set\n"; // RPL_NOTOPIC
+		else
+			msg = ":127.0.0.1 332 " + user->getNickname() + " #" + _name + " :" + _topic + "\n"; // RPL_TOPIC
+		sendMessage(user, msg);
+		msg = ":127.0.0.1 353 " + user->getNickname() + " = #" + _name + " :"; // RPL_NAMREPLY
+		for (std::map<std::string, Client *>::iterator it = _regulars.begin(); it != _regulars.end(); it++) {
+			msg += it->second->getNickname() + " ";
+			if (_operators.find(it->second->getNickname()) != _operators.end()) {
+				msg += "@";
+			}
+		}
+		msg += "\n";
+		sendMessage(user, msg);
 
+		msg = ":127.0.0.1 366 " + user->getNickname() + " #" + _name + " :End of NAMES list\n"; // RPL_ENDOFNAMES
+		sendMessage(user, msg);
+		_regulars[user->getNickname()] = user;
 	}
 	else
 		sendNumericResponse(user, "473", user->getNickname(), "ERR_INVITEONLYCHAN");
-}
-
-void Channel::userJoin(Client *user, std::string password) {
-    if (_invited.find(user->getNickname()) == _invited.end()) {
-        addUser(user, password);
-        return;
-    } else {
-        _invited.erase(user->getNickname());
-    }
-
-    if (user) {
-        sendAllUser(user);
-        std::string msg = ":" + user->getNickname() + "!~" + user->getUsername()[0] + "@127.0.0.1 JOIN #" + _name + "\n"; // RPL_JOIN
-        sendMessage(user, msg);
-
-        if (_topic != "") {
-            msg = ":127.0.0.1 332 " + user->getNickname() + " #" + _name + " :" + _topic + "\n"; // RPL_TOPIC
-        } else {
-            msg = ":127.0.0.1 331 " + user->getNickname() + " #" + _name + " :No topic set\n"; // RPL_NOTOPIC
-        }
-        sendMessage(user, msg);
-
-        if (_topic != "") {
-            msg = ":127.0.0.1 333 " + user->getNickname() + " #" + _name + ' ' + _topicsetter + ' ' + _topicdate + '\n'; // RPL_TOPICWHOTIME
-            sendMessage(user, msg);
-        }
-
-        msg = ":127.0.0.1 353 " + user->getNickname() + " = #" + _name + " :"; // RPL_NAMREPLY
-        for (std::map<std::string, Client *>::iterator it = _regulars.begin(); it != _regulars.end(); it++) {
-            if (_operators.find(it->second->getNickname()) != _operators.end()) {
-                msg += "@";
-            }
-            msg += it->second->getNickname() + " ";
-        }
-        msg += user->getNickname() + "\n";
-        sendMessage(user, msg);
-
-        msg = ":127.0.0.1 366 " + user->getNickname() + " #" + _name + " :End of /NAMES list.\n"; // RPL_ENDOFNAMES
-        sendMessage(user, msg);
-        _regulars[user->getNickname()] = user;
-    }
 }
 
 void	Channel::sendAllUser(Client *user)
@@ -165,7 +139,7 @@ void Channel::removeUser(Client* user)
 void Channel::invite(Client* sender, Client* newUser)
 {
 	// Check if the sender is an operator of the channel
-	if (_operators.find(sender->getNickname()) == _operators.end())
+	if (_operators.find(sender->getNickname()) == _operators.end())// rajout verif si mode inviteonly activé
 	{
 		sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
 		return;
@@ -183,7 +157,7 @@ void Channel::invite(Client* sender, Client* newUser)
 		sendMessage(newUser, inviteMessage);
 	}
 	else
-		sendNumericResponse(sender, "401", sender->getNickname(), newUser->getNickname()); // ERR_NOSUCHNICK
+		sendNumericResponse(sender, "401", sender->getNickname(), newUser->getNickname()); // a deplacer dans le parsing
 }
 
 void Channel::topic(Client* sender, const std::string& newTopic) {
@@ -192,16 +166,14 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
 		sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
 		return;
 	}
-	if (_restrictTopic == false)
-		return ;
 	// If no new topic is specified, send the current topic to the sender
-	if (newTopic.empty()) {
+	else if (newTopic.empty()) {//envoyé à tous les regulars 
 		sendNumericResponse(sender, "332", sender->getNickname(), _name); // RPL_TOPIC
 		sendNumericResponse(sender, "333", sender->getNickname(), _name); // RPL_TOPICWHOTIME
 		return;
 	}
 	// Check if the new topic is too long
-	if (newTopic.size() > 80) {
+	else if (newTopic.size() > 80) {
 		sendNumericResponse(sender, "409", sender->getNickname(), _name); // ERR_TOOLONG
 		return;
 	}
@@ -209,7 +181,7 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
 	_topic = newTopic;
 	std::string topicMessage = ":" + sender->getNickname() + "!~" + sender->getUsername() + "@127.0.0.1 TOPIC #" + _name + " :" + _topic + "\n";
 	sendAll(topicMessage);
-}
+}//corrige moi cette merde
 
 void Channel::checkMode(std::string **mess)
 {
