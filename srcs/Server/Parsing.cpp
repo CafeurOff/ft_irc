@@ -148,18 +148,6 @@ void	Server::ft_join_receive(std::string buffer, int client)
 	}
 }
 
-/*	ft_mode_receive
-**	@param buffer : the buffer to parse
-**	@param client : the fd of the client
-**	Change the mode of the client
-*/
-
-void	Server::ft_mode_receive(std::string buffer, int client)
-{
-	(void)buffer;
-	(void)client;
-}
-
 /*	ft_topic_receive
 **	@param buffer : the buffer to parse
 **	@param client : the fd of the client
@@ -168,8 +156,21 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 
 void	Server::ft_topic_receive(std::string buffer, int client)
 {
-	(void)buffer;
-	(void)client;
+	std::string	channel;
+	std::string	newTopic;
+	Channel	*chan;
+
+	if (buffer.find("#", 0) != std::string::npos)
+		ft_send_error(client, 461, "TOPIC", "ERR_NEEDMOREPARAMS");
+	if (buffer.find(":", 0) != std::string::npos)
+	{
+		channel = buffer.substr(7, buffer.find(" ", 6) - 6);
+		newTopic = buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":",0));
+	}
+	else
+		channel = buffer.substr(7, buffer.length() - 7);
+	chan = findChannel(channel);
+	chan->topic(findClient(client), newTopic);
 }
 
 /*	ft_invite_receive
@@ -179,6 +180,18 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 */
 
 void	Server::ft_invite_receive(std::string buffer, int client)
+{
+	(void)buffer;
+	(void)client;
+}
+
+/*	ft_mode_receive
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Change the mode of the client
+*/
+
+void	Server::ft_mode_receive(std::string buffer, int client)
 {
 	(void)buffer;
 	(void)client;
