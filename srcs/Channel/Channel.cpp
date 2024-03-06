@@ -136,52 +136,60 @@ void Channel::removeUser(Client* user)
 	_nUser--;
 }
 
-void Channel::invite(Client* sender, Client* newUser)
-{
-	// Check if the sender is an operator of the channel
-	if (_operators.find(sender->getNickname()) == _operators.end())// rajout verif si mode inviteonly activé
-	{
-		sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
-		return;
-	}
-	//  Check if the target user is already on the channel
-	if (_regulars.find(newUser->getNickname()) != _regulars.end())
-	{
-		sendNumericResponse(sender, "443", sender->getNickname(), newUser->getNickname()); // ERR_USERONCHANNEL
-		return;
-	}
-	// sens a message to the target user asking for him to join the channel
-	if (newUser != NULL)
-	{
-		std::string inviteMessage = ":" + sender->getNickname() + " INVITE " + newUser->getNickname() + " :" + _name + "\n";
-		sendMessage(newUser, inviteMessage);
-	}
-	else
-		sendNumericResponse(sender, "401", sender->getNickname(), newUser->getNickname()); // a deplacer dans le parsing
+void Channel::invite(Client* sender, Client* newUser) {
+    // Check if the sender is an operator of the channel
+    if (_operators.find(sender->getNickname()) == _operators.end()) {
+        // If inviteonly mode is active, return an error
+        if (_inviteOnly) {
+            sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
+            return;
+        }
+    }
+
+    // Check if the target user is already on the channel
+    if (_regulars.find(newUser->getNickname()) != _regulars.end()) {
+        sendNumericResponse(sender, "443", sender->getNickname(), newUser->getNickname()); // ERR_USERONCHANNEL
+        return;
+    }
+
+    // Send a message to the target user asking them to join the channel
+    if (newUser != NULL) {
+        std::string inviteMessage = ":" + sender->getNickname() + " INVITE " + newUser->getNickname() + " :" + _name + "\n";
+        sendMessage(newUser, inviteMessage);
+    } else {
+        sendNumericResponse(sender, "401", sender->getNickname(), ""); // ERR_NOSUCHNICK
+    }
 }
 
+
 void Channel::topic(Client* sender, const std::string& newTopic) {
-	// Check if the sender is an operator of the channel or the only person in it
-	if (_restrictTopic && _operators.find(sender->getNickname()) == _operators.end()) {
-		sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
-		return;
-	}
-	// If no new topic is specified, send the current topic to the sender
-	else if (newTopic.empty()) {//envoyé à tous les regulars 
-		sendNumericResponse(sender, "332", sender->getNickname(), _name); // RPL_TOPIC
-		sendNumericResponse(sender, "333", sender->getNickname(), _name); // RPL_TOPICWHOTIME
-		return;
-	}
-	// Check if the new topic is too long
-	else if (newTopic.size() > 80) {
-		sendNumericResponse(sender, "409", sender->getNickname(), _name); // ERR_TOOLONG
-		return;
-	}
-	// If everything is fine, change the topic and notify all users about this event
-	_topic = newTopic;
-	std::string topicMessage = ":" + sender->getNickname() + "!~" + sender->getUsername() + "@127.0.0.1 TOPIC #" + _name + " :" + _topic + "\n";
-	sendAll(topicMessage);
-}//corrige moi cette merde
+    // Check if the sender is an operator of the channel or the only person in it
+    if (_restrictTopic && _operators.find(sender->getNickname()) == _operators.end()) {
+        sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
+        return;
+    }
+
+    // Check if the new topic is too long
+    if (newTopic.size() > 80) {
+        sendNumericResponse(sender, "403", sender->getNickname(), _name); // ERR_TOPICTOOLONG
+        return;
+    }
+
+    // If no new topic is specified, send the current topic to the sender
+    if (newTopic.empty()) {
+        sendNumericResponse(sender, "331", sender->getNickname(), _name); // RPL_NOTOPIC
+        return;
+    }
+
+    // If everything is fine, change the topic and notify all users about this event
+    _topic = newTopic;
+    std::string topicMessage = ":" + sender->getNickname() + "!~" + sender->getUsername() + "@127.0.0.1 TOPIC #" + _name + " :" + _topic + "\n";
+    sendAll(topicMessage);
+
+    // Notify the sender about the successful topic change
+    sendNumericResponse(sender, "332", sender->getNickname(), _name); // RPL_TOPIC
+    sendNumericResponse(sender, "333", sender->getNickname(), _name); // RPL_TOPICWHOTIME
+}
 
 void Channel::checkMode(std::string **mess)
 {
