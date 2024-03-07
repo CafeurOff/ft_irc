@@ -17,6 +17,7 @@ class Channel
         bool _limitUser;
         bool _passwordUse;
         int _nUser;
+        int _nUserLimit;
         std::map<std::string, Client*> _operators;
         std::map<std::string, Client*> _regulars;
         std::map<std::string, Client*> _invited;

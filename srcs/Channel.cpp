@@ -3,13 +3,13 @@
 Channel::Channel(const std::string& name)
         : _name(name), _password(""), _topic(""), _inviteOnly(false),
           _restrictTopic(true), _limitUser(false), _passwordUse(false),
-          _nUser(0) {}
+          _nUser(0) _nUserLimit(0) {}
 
 
 Channel::Channel(std::string name, std::string password) 
         : _name(name), _password(password), _topic(""), _inviteOnly(false),
           _restrictTopic(true), _limitUser(false), _passwordUse(true),
-          _nUser(0) {}
+          _nUser(0) _nUserLimit(0) {}
 
 
 Channel::~Channel()
@@ -103,7 +103,7 @@ void Channel::addUser(Client* user)
         _regulars[user->getNickname()] = user;
         _nUser++;
     }
-    else
+    else if (_nUser < _nUserLimit)
     {
         //verifier que le user est inviter avant de l'ajouter
         invite(user, user->getNickname());
@@ -215,11 +215,23 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
         }
         else if (modeChar == 'o') //Donner le privilege d'operateur
         {
-
+            if (_operators.find(param) != _operators.end())
+                return ;
+            std::map<std::string, Client*>::iterator it = _regulars.find(param);
+            if (it != _regulars.end())
+            {
+                Client* user = it->second;
+                _regulars.erase(it);
+                _operators[param] = user;
+            }
         }
         else if (modeChar == 'l') //Definir une limite d'utilisateur du canal
         {
-
+            if (_limitUser == false)
+            {
+                _limitUser = true;
+                _nUserLimit = param;
+            }
         }
     }
     else if (modeSign == '-')
@@ -242,13 +254,25 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
                _password = "";
             }
         }
-        else if (modeChar == 'o') //Recevoir le privilege d'operateur
+        else if (modeChar == 'o') //Retirer le privilege d'operateur
         {
-
+            if (_regulars.find(param) != _regulars.end())
+                return ;
+            std::map<std::string, Client*>::iterator it = _operators.find(param);
+            if (it != _operators.end())
+            {
+                Client* user = it->second;
+                _operators.erase(it);
+                _regulars[param] = user;
+            }
         }
         else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
         {
-            
+            if (_limitUser == true)
+            {
+                _limitUser = false;
+                _nUserLimit = 0;
+            }
         }
     }
 }
