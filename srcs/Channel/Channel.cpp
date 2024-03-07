@@ -195,20 +195,20 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
 void Channel::quitChannel(Client* client, std::string mess)
 {
 
-	for (std::map<std::string, Client*>::iterator it = _regulars.begin(); it != _regulars.end(); ++it)
+	std::map<std::string, Client*>::iterator it = _regulars.find(client->getNickname());
+	if (it != _regulars.end())
+		_regulars.erase(it);
+	else
+		sendNumericResponse(client, "442", client->getNickname(), _name);
+
+	/*for (std::map<std::string, Client*>::iterator it = _regulars.begin(); it != _regulars.end(); ++it)
 	{
 		if (it->second == client)
 		{
-			_regulars.erase(client->getNickname());
-			if (mess.empty())
-			{
-				std::string msg = client->getNickname() + " quit channel";
-				send(client->getFd(), msg.c_str(), msg.size(), MSG_CONFIRM); 
-			}
-			else
-				sendMessage(client, mess);
+			_regulars.erase(it);
+			break ;
 		}
-		else
+		else if (it == _regulars.end())
 			sendNumericResponse(client, "442", client->getNickname(), _name);
 	}
 	for (std::map<std::string, Client*>::iterator it = _operators.begin(); it != _regulars.end(); ++it)
@@ -216,17 +216,11 @@ void Channel::quitChannel(Client* client, std::string mess)
 		if (it->second == client)
 		{
 			_operators.erase(client->getNickname());
-			if (mess.empty())
-			{
-				std::string msg = client->getNickname() + " quit channel";
-				send(client->getFd(), msg.c_str(), msg.size(), MSG_CONFIRM); 
-			}
-			else
-				sendMessage(client, mess);
+			break ;
 		}
 		else
 			sendNumericResponse(client, "442", client->getNickname(), _name);
-	}
+	}*/
 }
 
 void Channel::checkMode(std::string **mess)
