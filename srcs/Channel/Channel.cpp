@@ -192,6 +192,43 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
     sendNumericResponse(sender, "333", sender->getNickname(), _name); // RPL_TOPICWHOTIME
 }
 
+void Channel::quitChannel(Client* client, std::string mess)
+{
+
+	for (std::map<std::string, Client*>::iterator it = _regulars.begin(); it != _regulars.end(); ++it)
+	{
+		if (it->second == client)
+		{
+			_regulars.erase(client->getNickname());
+			if (mess.empty())
+			{
+				std::string msg = client->getNickname() + " quit channel";
+				send(client->getFd(), msg.c_str(), msg.size(), MSG_CONFIRM); 
+			}
+			else
+				sendMessage(client, mess);
+		}
+		else
+			sendNumericResponse(client, "442", client->getNickname(), _name);
+	}
+	for (std::map<std::string, Client*>::iterator it = _operators.begin(); it != _regulars.end(); ++it)
+	{
+		if (it->second == client)
+		{
+			_operators.erase(client->getNickname());
+			if (mess.empty())
+			{
+				std::string msg = client->getNickname() + " quit channel";
+				send(client->getFd(), msg.c_str(), msg.size(), MSG_CONFIRM); 
+			}
+			else
+				sendMessage(client, mess);
+		}
+		else
+			sendNumericResponse(client, "442", client->getNickname(), _name);
+	}
+}
+
 void Channel::checkMode(std::string **mess)
 {
 	size_t i = 0;
@@ -211,7 +248,7 @@ void Channel::checkMode(std::string **mess)
 	}
 }
 
-void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
+void Channel::modifMode(char modeSign, char modeChar, std::string &param)
 {
 	if (modeSign == '+')
 	{
@@ -247,7 +284,7 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
             if (_limit == false)
             {
                 _limit = true;
-                _nUserLimit = param;
+                _limit = std::atoi(param.c_str());
             }
             //sendNumericResponse("346");
             //sendNumericResponse("347");
@@ -290,7 +327,7 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
             if (_limit == true)
             {
                 _limit = false;
-                _nUserLimit = 0;
+                _limit = 0;
             }
             //sendNumericResponse("346");
             //sendNumericResponse("347");
