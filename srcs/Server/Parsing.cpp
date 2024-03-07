@@ -181,8 +181,19 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 
 void	Server::ft_invite_receive(std::string buffer, int client)
 {
-	(void)buffer;
-	(void)client;
+	std::string	channel;
+	std::string	user;
+	Channel	*chan;
+	Client	*newUser;
+
+	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos || buffer.find(" ", 7) == std::string::npos)
+		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
+	channel = buffer.substr(buffer.find("#", 0) + 1, buffer.length() - buffer.find("#", 0) + 1);
+	user = buffer.substr(7, buffer.find(" ",7) - 7);
+	chan = findChannel(channel);
+	newUser = findClient(findFdByNickname(user));
+	if (chan && newUser)
+		chan->invite(findClient(client), newUser);
 }
 
 /*	ft_mode_receive
@@ -193,8 +204,27 @@ void	Server::ft_invite_receive(std::string buffer, int client)
 
 void	Server::ft_mode_receive(std::string buffer, int client)
 {
-	(void)buffer;
-	(void)client;
+	//std::string **param;
+	std::string	channel;
+	Channel	*chan;
+
+	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos)
+	{
+		ft_send_error(client, 461, "MODE", "ERR_NEEDMOREPARAMS");
+		return ;
+	}
+	if (buffer.find(" ", 5) == std::string::npos)
+		return ;
+	channel = buffer.substr(buffer.find("#", 0) + 1, buffer.find(" ", 5) - 6);
+	chan = findChannel(channel);
+	if (chan->clientInChannel(findClient(client)) == 0)
+	{
+		ft_send_error(client, 403, "MODE", "ERR_NOSUCHCHANNEL");
+		return ;
+	}
+	if (buffer.substr(buffer.find(" ", 5) + 1, buffer.length()) == "+b")
+		return ;
+	std::cout << buffer.substr(buffer.find(" ", 5) + 1, buffer.length()) << std::endl;
 }
 
 /*	ft_kick_receive
