@@ -191,6 +191,21 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
     sendNumericResponse(sender, "333", sender->getNickname(), _name); // RPL_TOPICWHOTIME
 }
 
+void Channel::quitChannel(Client* client, std::string mess)
+{
+	std::map<std::string, Client*>::iterator it = _regulars.find(client->getNickname());
+	if (it != _regulars.end())
+	{
+		_regulars.erase(it);
+		_nUser--;
+	}
+	it = _operators.find(client->getNickname());
+	if (it != _operators.end())
+		_operators.erase(it);
+	std::string msg = ":" + client->getNickname() + "!~" + client->getUsername() + "@127.0.0.1" + " PART #" + _name + " :" + mess + "\n";
+	sendAll(msg);	
+}
+
 void Channel::checkMode(std::string **mess)
 {
 	size_t i = 0;
