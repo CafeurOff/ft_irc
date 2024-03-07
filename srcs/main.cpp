@@ -1,18 +1,13 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: lduthill <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/02/12 16:28:11 by lduthill          #+#    #+#             */
-/*   Updated: 2024/02/20 14:53:42 by lduthill         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-
 #include "../inc/irc.hpp"
 #include "../inc/Server.hpp"
+#include "../inc/Client.hpp"
+#include "../inc/Channel.hpp"
+
+/*	Main
+**	@param ac : the number of arguments
+**	@param av : the arguments
+**	Launch the server
+*/
 
 int	main(int ac, char **av)
 {
@@ -30,10 +25,15 @@ int	main(int ac, char **av)
 	return (0);
 }
 
+/*	ft_launch_server
+**	@param av : the arguments
+**	Launch the server
+*/
+
 void	ft_launch_server(char **av)
 {
 	Server server(av);
-	server.init();
+	server.Init();
 	while (1)
 		continue;
 }
