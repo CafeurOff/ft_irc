@@ -91,9 +91,15 @@ void Channel::addUser(Client* user, std::string password)
 {
 	std::string	msg;
 	if (password != _password && _passwordUse == true)
+	{
 		sendNumericResponse(user, "475", user->getNickname(), "ERR_BADCHANNELKEY");
+		return ;
+	}
 	else if (_limitUser == true && _limit <= _nUser - 1)
+	{
 		sendNumericResponse(user, "471", user->getNickname(), "ERR_CHANNELISFULL");
+		return ;
+	}
 	else if (_inviteOnly == false)
 	{
 		_regulars.insert(std::pair<std::string, Client*>(user->getNickname() , user));
@@ -106,20 +112,22 @@ void Channel::addUser(Client* user, std::string password)
 		sendMessage(user, msg);
 		msg = ":127.0.0.1 353 " + user->getNickname() + " = #" + _name + " :"; // RPL_NAMREPLY
 		for (std::map<std::string, Client *>::iterator it = _regulars.begin(); it != _regulars.end(); it++) {
-			msg += it->second->getNickname() + " ";
 			if (_operators.find(it->second->getNickname()) != _operators.end()) {
 				msg += "@";
 			}
+			msg += it->second->getNickname() + " ";
 		}
 		msg += "\n";
 		sendMessage(user, msg);
-
 		msg = ":127.0.0.1 366 " + user->getNickname() + " #" + _name + " :End of NAMES list\n"; // RPL_ENDOFNAMES
 		sendMessage(user, msg);
 		_regulars[user->getNickname()] = user;
 	}
 	else
+	{
 		sendNumericResponse(user, "473", user->getNickname(), "ERR_INVITEONLYCHAN");
+		return ;
+	}
 }
 
 void	Channel::sendAllUser(Client *user)
