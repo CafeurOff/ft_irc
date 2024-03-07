@@ -6,6 +6,8 @@ Channel::Channel(const std::string name, Client *creator) : _name(name), _passwo
 	_regulars.insert(std::pair<std::string, Client*>(creator->getNickname() , creator));
 	_operators.insert(std::pair<std::string, Client*>(creator->getNickname() , creator));
 
+	sendMessage(creator, ":127.0.0.1 332 " + creator->getNickname() + " #" + _name + " :Welcome to the" + _name + "Channel!\n");
+
 	std::string joinMsg = ":" + creator->getNickname() + "!~" + creator->getUsername()[0] + "@127.0.0.1 JOIN #" + name + "\n";
 	sendMessage(creator, joinMsg);
 
@@ -24,6 +26,8 @@ Channel::Channel(std::string name, std::string password, Client *creator) : _nam
 {
 	_operators[creator->getNickname()] = creator;
 	_regulars[creator->getNickname()] = creator;
+
+	sendMessage(creator, ":127.0.0.1 332 " + creator->getNickname() + " #" + _name + " :Welcome to the" + _name + "Channel!\n");
 
 	std::string joinMsg = ":" + creator->getNickname() + "!~" + creator->getUsername()[0] + "@127.0.0.1 JOIN #" + name + "\n";
 	sendMessage(creator, joinMsg);
@@ -91,35 +95,43 @@ void Channel::addUser(Client* user, std::string password)
 {
 	std::string	msg;
 	if (password != _password && _passwordUse == true)
+	{
 		sendNumericResponse(user, "475", user->getNickname(), "ERR_BADCHANNELKEY");
+		return ;
+	}
 	else if (_limitUser == true && _limit <= _nUser - 1)
+	{
 		sendNumericResponse(user, "471", user->getNickname(), "ERR_CHANNELISFULL");
+		return ;
+	}
 	else if (_inviteOnly == false)
 	{
 		_regulars.insert(std::pair<std::string, Client*>(user->getNickname() , user));
 		_nUser++;
 		sendAllUser(user);
-		if (_restrictTopic == false)
+		if (_topic == "")
 			msg = ":127.0.0.1 331 " + user->getNickname() + " #" + _name + " :No topic set\n"; // RPL_NOTOPIC
 		else
 			msg = ":127.0.0.1 332 " + user->getNickname() + " #" + _name + " :" + _topic + "\n"; // RPL_TOPIC
 		sendMessage(user, msg);
 		msg = ":127.0.0.1 353 " + user->getNickname() + " = #" + _name + " :"; // RPL_NAMREPLY
 		for (std::map<std::string, Client *>::iterator it = _regulars.begin(); it != _regulars.end(); it++) {
-			msg += it->second->getNickname() + " ";
 			if (_operators.find(it->second->getNickname()) != _operators.end()) {
 				msg += "@";
 			}
+			msg += it->second->getNickname() + " ";
 		}
 		msg += "\n";
 		sendMessage(user, msg);
-
 		msg = ":127.0.0.1 366 " + user->getNickname() + " #" + _name + " :End of NAMES list\n"; // RPL_ENDOFNAMES
 		sendMessage(user, msg);
 		_regulars[user->getNickname()] = user;
 	}
 	else
+	{
 		sendNumericResponse(user, "473", user->getNickname(), "ERR_INVITEONLYCHAN");
+		return ;
+	}
 }
 
 void	Channel::sendAllUser(Client *user)
@@ -194,33 +206,17 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
 
 void Channel::quitChannel(Client* client, std::string mess)
 {
-
 	std::map<std::string, Client*>::iterator it = _regulars.find(client->getNickname());
 	if (it != _regulars.end())
+	{
 		_regulars.erase(it);
-	else
-		sendNumericResponse(client, "442", client->getNickname(), _name);
-
-	/*for (std::map<std::string, Client*>::iterator it = _regulars.begin(); it != _regulars.end(); ++it)
-	{
-		if (it->second == client)
-		{
-			_regulars.erase(it);
-			break ;
-		}
-		else if (it == _regulars.end())
-			sendNumericResponse(client, "442", client->getNickname(), _name);
+		_nUser--;
 	}
-	for (std::map<std::string, Client*>::iterator it = _operators.begin(); it != _regulars.end(); ++it)
-	{
-		if (it->second == client)
-		{
-			_operators.erase(client->getNickname());
-			break ;
-		}
-		else
-			sendNumericResponse(client, "442", client->getNickname(), _name);
-	}*/
+	it = _operators.find(client->getNickname());
+	if (it != _operators.end())
+		_operators.erase(it);
+	std::string msg = ":" + client->getNickname() + "!~" + client->getUsername() + "@127.0.0.1" + " PART #" + _name + " :" + mess + "\n";
+	sendAll(msg);	
 }
 
 void Channel::checkMode(std::string **mess)

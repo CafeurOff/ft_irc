@@ -40,8 +40,6 @@ class Channel
 		void sendAll(const std::string& message);
 		static void sendMessage(Client* client, const std::string& msg);
 		void sendAllUser(Client *user);
-
-
 		/* Channel */
 		static void createChannel(const std::string& name, Client* creator);
 		void kick(Client* creator, const std::string& targetNickname);
@@ -50,7 +48,6 @@ class Channel
 		void invite(Client* sender, Client* newUser);
 		void topic(Client* sender, const std::string& newTopic);
 		void quitChannel(Client* client, std::string mess);
-
 
 		/* Mode */
 		void checkMode(std::string **mess);

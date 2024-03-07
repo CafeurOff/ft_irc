@@ -139,7 +139,6 @@ void	Server::ft_join_receive(std::string buffer, int client)
 		else
 		{
 			channel = buffer.substr(6, buffer.length() - 7);
-			_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, findClient(client))));
 			chan = findChannel(channel);
 			if (!chan)
 				_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, findClient(client))));
@@ -161,7 +160,7 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 	std::string	newTopic;
 	Channel	*chan;
 
-	if (buffer.find("#", 0) != std::string::npos)
+	if (buffer.find("#", 0) == std::string::npos)
 		ft_send_error(client, 461, "TOPIC", "ERR_NEEDMOREPARAMS");
 	if (buffer.find(":", 0) != std::string::npos)
 	{
@@ -169,7 +168,7 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 		newTopic = buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":",0));
 	}
 	else
-		channel = buffer.substr(7, buffer.length() - 7);
+		channel = buffer.substr(7, buffer.length() - 8);
 	chan = findChannel(channel);
 	chan->topic(findClient(client), newTopic);
 }
@@ -210,7 +209,7 @@ void	Server::ft_kick_receive(std::string buffer, int client)
 	std::string	user;
 	Channel	*chan;
 
-	if (buffer.find("#", 0) != std::string::npos)
+	if (buffer.find("#", 0) == std::string::npos)
 		ft_send_error(client, 461, "KICK", "ERR_NEEDMOREPARAMS");
 	if (buffer.find(":", 0) != std::string::npos)
 	{
@@ -224,6 +223,22 @@ void	Server::ft_kick_receive(std::string buffer, int client)
 	}
 	chan = findChannel(channel);
 	chan->kick(findClient(client), user);
+}
+
+
+void	Server::ft_part_receive(std::string buffer, int client)
+{
+	std::string	channel;
+	Channel	*chan;
+
+	if (buffer.find("#", 0) == std::string::npos)
+		ft_send_error(client, 461, "PART", "ERR_NEEDMOREPARAMS");
+	if (buffer.find(":", 0) != std::string::npos)
+		channel = buffer.substr(6, buffer.find(" ", 5) - 6);
+	else
+		channel = buffer.substr(6, buffer.length() - 7);
+	chan = findChannel(channel);
+	chan->quitChannel(findClient(client), buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":", 0) - 2));
 }
 
 /*	ft_send_error

@@ -7,10 +7,10 @@
 
 Server::Server(char **av)
 {
-	_socket = socket(AF_INET, SOCK_STREAM, 0);
-	_opt = 1;
-	_port = atoi(av[1]);
-	_password = av[2];
+	  _socket = socket(AF_INET, SOCK_STREAM, 0);
+	  _opt = 1;
+	  _port = atoi(av[1]);
+	  _password = av[2];
 
     commandFunctions["PASS"] = &Server::ft_verif_pass;
     commandFunctions["NICK"] = &Server::ft_nick_receive;
@@ -20,8 +20,9 @@ Server::Server(char **av)
     commandFunctions["MODE"] = &Server::ft_mode_receive;
     commandFunctions["TOPIC"] = &Server::ft_topic_receive;
     commandFunctions["INVITE"] = &Server::ft_invite_receive;
-	commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
-	commandFunctions["KICK"] = &Server::ft_kick_receive;
+	  commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
+	  commandFunctions["KICK"] = &Server::ft_kick_receive;
+  	commandFunctions["PART"] = &Server::ft_part_receive;
 }
 
 /*	Destructor
