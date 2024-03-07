@@ -139,7 +139,6 @@ void	Server::ft_join_receive(std::string buffer, int client)
 		else
 		{
 			channel = buffer.substr(6, buffer.length() - 7);
-			_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, findClient(client))));
 			chan = findChannel(channel);
 			if (!chan)
 				_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, findClient(client))));
