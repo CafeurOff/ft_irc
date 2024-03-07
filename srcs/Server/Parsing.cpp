@@ -226,6 +226,7 @@ void	Server::ft_kick_receive(std::string buffer, int client)
 	chan->kick(findClient(client), user);
 }
 
+
 void	Server::ft_part_receive(std::string buffer, int client)
 {
 	std::string	channel;
