@@ -6,6 +6,8 @@ Channel::Channel(const std::string name, Client *creator) : _name(name), _passwo
 	_regulars.insert(std::pair<std::string, Client*>(creator->getNickname() , creator));
 	_operators.insert(std::pair<std::string, Client*>(creator->getNickname() , creator));
 
+	sendMessage(creator, ":127.0.0.1 332 " + creator->getNickname() + " #" + _name + " :Welcome to the" + _name + "Channel!\n");
+
 	std::string joinMsg = ":" + creator->getNickname() + "!~" + creator->getUsername()[0] + "@127.0.0.1 JOIN #" + name + "\n";
 	sendMessage(creator, joinMsg);
 
@@ -24,6 +26,8 @@ Channel::Channel(std::string name, std::string password, Client *creator) : _nam
 {
 	_operators[creator->getNickname()] = creator;
 	_regulars[creator->getNickname()] = creator;
+
+	sendMessage(creator, ":127.0.0.1 332 " + creator->getNickname() + " #" + _name + " :Welcome to the" + _name + "Channel!\n");
 
 	std::string joinMsg = ":" + creator->getNickname() + "!~" + creator->getUsername()[0] + "@127.0.0.1 JOIN #" + name + "\n";
 	sendMessage(creator, joinMsg);
@@ -105,7 +109,7 @@ void Channel::addUser(Client* user, std::string password)
 		_regulars.insert(std::pair<std::string, Client*>(user->getNickname() , user));
 		_nUser++;
 		sendAllUser(user);
-		if (_restrictTopic == false)
+		if (_topic == "")
 			msg = ":127.0.0.1 331 " + user->getNickname() + " #" + _name + " :No topic set\n"; // RPL_NOTOPIC
 		else
 			msg = ":127.0.0.1 332 " + user->getNickname() + " #" + _name + " :" + _topic + "\n"; // RPL_TOPIC
