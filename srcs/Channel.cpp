@@ -121,28 +121,30 @@ void Channel::invite(Client* sender, const std::string& targetNickname)
     // Check if the sender is an operator of the channel
     if (_operators.find(sender->getNickname()) == _operators.end()) 
     {
-        sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
+        // If inviteonly mode is active, return an error
+        if (_inviteOnly) 
+        {
+            sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
+            return;
+        }
+    }
+
+    // Check if the target user is already on the channel
+    if (_regulars.find(newUser->getNickname()) != _regulars.end()) {
+        sendNumericResponse(sender, "443", sender->getNickname(), newUser->getNickname()); // ERR_USERONCHANNEL
         return;
     }
 
-    //  Check if the target user is already on the channel
-    if (_regulars.find(targetNickname) != _regulars.end()) 
+    // Send a message to the target user asking them to join the channel
+    if (newUser != NULL) 
     {
-        sendNumericResponse(sender, "443", sender->getNickname(), targetNickname); // ERR_USERONCHANNEL
-        return;
-    }
-
-    // sens a message to the target user asking for him to join the channel
-    Client* targetUser = findClientByNickname(targetNickname); // Vous devez implémenter cette fonction pour rechercher un client par son surnom
-    if (targetUser != nullptr) 
-    {
-        std::string inviteMessage = ":" + sender->getNickname() + " INVITE " + targetNickname + " :" + _name + "\n";
-
-        sendMessage(targetUser, inviteMessage);
+        std::string inviteMessage = ":" + sender->getNickname() + " INVITE " + newUser->getNickname() + " :" + _name + "\n";
+        sendMessage(newUser, inviteMessage);
+        _invited[newUser->getNickname()] = newUser;
     } 
     else 
     {
-        sendNumericResponse(sender, "401", sender->getNickname(), targetNickname); // ERR_NOSUCHNICK
+        sendNumericResponse(sender, "401", sender->getNickname(), ""); // ERR_NOSUCHNICK
     }
 }
 
@@ -232,6 +234,8 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
                 _limitUser = true;
                 _nUserLimit = param;
             }
+            //sendNumericResponse("346");
+            //sendNumericResponse("347");
         }
     }
     else if (modeSign == '-')
@@ -273,6 +277,8 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
                 _limitUser = false;
                 _nUserLimit = 0;
             }
+            sendNumericResponse("346");
+            sendNumericResponse("347");
         }
     }
 }
