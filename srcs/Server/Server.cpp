@@ -22,6 +22,7 @@ Server::Server(char **av)
     commandFunctions["INVITE"] = &Server::ft_invite_receive;
 	commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
 	commandFunctions["KICK"] = &Server::ft_kick_receive;
+	commandFunctions["PART"] = &Server::ft_part_receive;
 }
 
 /*	Destructor
