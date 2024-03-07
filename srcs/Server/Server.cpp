@@ -7,21 +7,21 @@
 
 Server::Server(char **av)
 {
-	  _socket = socket(AF_INET, SOCK_STREAM, 0);
-	  _opt = 1;
-	  _port = atoi(av[1]);
-	  _password = av[2];
+	_socket = socket(AF_INET, SOCK_STREAM, 0);
+	_opt = 1;
+	_port = atoi(av[1]);
+	_password = av[2];
 
-    commandFunctions["PASS"] = &Server::ft_verif_pass;
-    commandFunctions["NICK"] = &Server::ft_nick_receive;
-    commandFunctions["USER"] = &Server::ft_user_receive;
+	commandFunctions["PASS"] = &Server::ft_verif_pass;
+	commandFunctions["NICK"] = &Server::ft_nick_receive;
+	commandFunctions["USER"] = &Server::ft_user_receive;
     commandFunctions["QUIT"] = &Server::ft_quit_user;
     commandFunctions["JOIN"] = &Server::ft_join_receive;
     commandFunctions["MODE"] = &Server::ft_mode_receive;
     commandFunctions["TOPIC"] = &Server::ft_topic_receive;
     commandFunctions["INVITE"] = &Server::ft_invite_receive;
-	  commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
-	  commandFunctions["KICK"] = &Server::ft_kick_receive;
+	commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
+	commandFunctions["KICK"] = &Server::ft_kick_receive;
   	commandFunctions["PART"] = &Server::ft_part_receive;
 }
 
@@ -50,7 +50,7 @@ void	Server::Launch()
 
 	while (1)
 	{
-		int rc = poll(pstruct, nb_client + 1, 0);
+		int rc = poll(pstruct, nb_client + 1, 5000);
 		if (rc > 0)
 		{
 			if (pstruct[0].revents & POLLIN)
