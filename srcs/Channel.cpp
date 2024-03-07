@@ -277,8 +277,8 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
                 _limitUser = false;
                 _nUserLimit = 0;
             }
-            sendNumericResponse("346");
-            sendNumericResponse("347");
+            //sendNumericResponse("346");
+            //sendNumericResponse("347");
         }
     }
 }

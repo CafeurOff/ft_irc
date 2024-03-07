@@ -156,6 +156,7 @@ void Channel::invite(Client* sender, Client* newUser) {
     if (newUser != NULL) {
         std::string inviteMessage = ":" + sender->getNickname() + " INVITE " + newUser->getNickname() + " :" + _name + "\n";
         sendMessage(newUser, inviteMessage);
+		_invited[newUser->getNickname()] = newUser;
     } else {
         sendNumericResponse(sender, "401", sender->getNickname(), ""); // ERR_NOSUCHNICK
     }
@@ -230,13 +231,27 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
 				setPassword(param);
 		}
 		else if (modeChar == 'o') //Donner le privilege d'operateur
-		{
-
-		}
-		else if (modeChar == 'l') //Definir une limite d'utilisateur du canal
-		{
-
-		}
+        {
+            if (_operators.find(param) != _operators.end())
+                return ;
+            std::map<std::string, Client*>::iterator it = _regulars.find(param);
+            if (it != _regulars.end())
+            {
+                Client* user = it->second;
+                _regulars.erase(it);
+                _operators[param] = user;
+            }
+        }
+        else if (modeChar == 'l') //Definir une limite d'utilisateur du canal
+        {
+            if (_limit == false)
+            {
+                _limit = true;
+                _nUserLimit = param;
+            }
+            //sendNumericResponse("346");
+            //sendNumericResponse("347");
+        }
 	}
 	else if (modeSign == '-')
 	{
@@ -258,14 +273,28 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
 				_password = "";
 			}
 		}
-		else if (modeChar == 'o') //Recevoir le privilege d'operateur
-		{
-
-		}
-		else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
-		{
-
-		}
+		else if (modeChar == 'o') //Retirer le privilege d'operateur
+        {
+            if (_regulars.find(param) != _regulars.end())
+                return ;
+            std::map<std::string, Client*>::iterator it = _operators.find(param);
+            if (it != _operators.end())
+            {
+                Client* user = it->second;
+                _operators.erase(it);
+                _regulars[param] = user;
+            }
+        }
+        else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
+        {
+            if (_limit == true)
+            {
+                _limit = false;
+                _nUserLimit = 0;
+            }
+            //sendNumericResponse("346");
+            //sendNumericResponse("347");
+        }
 	}
 }
 
