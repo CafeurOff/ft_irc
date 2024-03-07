@@ -158,16 +158,17 @@ void Channel::invite(Client* sender, Client* newUser) {
         }
     }
 
-    // Check if the target user is already on the channel
-    if (_regulars.find(newUser->getNickname()) != _regulars.end()) {
-        sendNumericResponse(sender, "443", sender->getNickname(), newUser->getNickname()); // ERR_USERONCHANNEL
-        return;
-    }
+	// Check if the target user is already in the channel
+	if (_regulars.find(newUser->getNickname()) != _regulars.end()) {
+		// CHANGE HERE THE ERROR MESSAGE DON'T WORK
+		sendNumericResponse(sender, "443", sender->getNickname(), _name);
+		return;
+	}
 
     // Send a message to the target user asking them to join the channel
     if (newUser != NULL) {
-        std::string inviteMessage = ":" + sender->getNickname() + " INVITE " + newUser->getNickname() + " :" + _name + "\n";
-        sendMessage(newUser, inviteMessage);
+		std::string inviteMessage = ":" + sender->getNickname() + "!~" + sender->getUsername() + "@127.0.0.1" + " INVITE " + newUser->getNickname() + " :" + _name + "\n";
+		sendMessage(newUser, inviteMessage);
     } else {
         sendNumericResponse(sender, "401", sender->getNickname(), ""); // ERR_NOSUCHNICK
     }
@@ -187,11 +188,15 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
         return;
     }
 
-    // If no new topic is specified, send the current topic to the sender
-    if (newTopic.empty()) {
-        sendNumericResponse(sender, "331", sender->getNickname(), _name); // RPL_NOTOPIC
-        return;
-    }
+	// If command is just topic, show the current topic
+	if (newTopic.empty())
+	{
+		if (_topic == "")
+			sendNumericResponse(sender, "331", sender->getNickname(), _name); // RPL_NOTOPIC
+		else
+			sendNumericResponse(sender, "332", sender->getNickname(), _name); // RPL_TOPIC
+		return;
+	}
 
     // If everything is fine, change the topic and notify all users about this event
     _topic = newTopic;
@@ -215,7 +220,7 @@ void Channel::quitChannel(Client* client, std::string mess)
 	if (it != _operators.end())
 		_operators.erase(it);
 	std::string msg = ":" + client->getNickname() + "!~" + client->getUsername() + "@127.0.0.1" + " PART #" + _name + " :" + mess + "\n";
-	sendAll(msg);	
+	sendAll(msg);
 }
 
 void Channel::checkMode(std::string **mess)
