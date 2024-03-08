@@ -37,6 +37,7 @@ Server::~Server()
 /*	ft_sigint
 **	@param sig : the signal
 **	Handle the signal SIGINT
+** 	Set the server to false
 */
 
 void	ft_sigint(int sig)
