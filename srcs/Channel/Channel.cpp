@@ -242,7 +242,7 @@ void Channel::checkMode(std::string **mess)
 	}
 }
 
-void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
+void Channel::modifMode(char modeSign, char modeChar, std::string &param)
 {
 	if (modeSign == '+')
 	{
@@ -262,13 +262,27 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
 				setPassword(param);
 		}
 		else if (modeChar == 'o') //Donner le privilege d'operateur
-		{
-
-		}
-		else if (modeChar == 'l') //Definir une limite d'utilisateur du canal
-		{
-
-		}
+        {
+            if (_operators.find(param) != _operators.end())
+                return ;
+            std::map<std::string, Client*>::iterator it = _regulars.find(param);
+            if (it != _regulars.end())
+            {
+                Client* user = it->second;
+                _regulars.erase(it);
+                _operators[param] = user;
+            }
+        }
+        else if (modeChar == 'l') //Definir une limite d'utilisateur du canal
+        {
+            if (_limit == false)
+            {
+                _limit = true;
+                _limit = std::atoi(param.c_str());
+            }
+            //sendNumericResponse("346");
+            //sendNumericResponse("347");
+        }
 	}
 	else if (modeSign == '-')
 	{
@@ -290,14 +304,28 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
 				_password = "";
 			}
 		}
-		else if (modeChar == 'o') //Recevoir le privilege d'operateur
-		{
-
-		}
-		else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
-		{
-
-		}
+		else if (modeChar == 'o') //Retirer le privilege d'operateur
+        {
+            if (_regulars.find(param) != _regulars.end())
+                return ;
+            std::map<std::string, Client*>::iterator it = _operators.find(param);
+            if (it != _operators.end())
+            {
+                Client* user = it->second;
+                _operators.erase(it);
+                _regulars[param] = user;
+            }
+        }
+        else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
+        {
+            if (_limit == true)
+            {
+                _limit = false;
+                _limit = 0;
+            }
+            //sendNumericResponse("346");
+            //sendNumericResponse("347");
+        }
 	}
 }
 
