@@ -34,6 +34,5 @@ void	ft_launch_server(char **av)
 {
 	Server server(av);
 	server.Init();
-	while (1)
-		continue;
+	server.Launch();
 }

@@ -1,5 +1,6 @@
 #include "../../inc/Server.hpp"
 
+bool ServerUp = true;
 /*	Constructor
 **	@param av : the arguments of the server
 **	Set all commands for my map
@@ -31,8 +32,20 @@ Server::Server(char **av)
 
 Server::~Server()
 {
-	close(_socket);
-	close(_new_socket);
+}
+
+/*	ft_sigint
+**	@param sig : the signal
+**	Handle the signal SIGINT
+*/
+
+void	ft_sigint(int sig)
+{
+	if (sig == SIGINT)
+	{
+		std::cout << "Server is shutting down" << std::endl;
+		ServerUp = false;
+	}
 }
 
 /*	Launch
@@ -48,7 +61,13 @@ void	Server::Launch()
 	pstruct[0].events = POLLIN | POLLPRI;
 	int	nb_client = 0;
 
-	while (1)
+	struct sigaction act;
+	act.sa_flags = 0;
+	sigemptyset(&act.sa_mask);
+	act.sa_handler = &ft_sigint;
+	sigaction(SIGINT, &act, NULL);
+
+	while (ServerUp)
 	{
 		int rc = poll(pstruct, nb_client + 1, 5000);
 		if (rc > 0)
@@ -123,7 +142,6 @@ void	Server::Init()
 		std::cerr << "listen failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	Launch();
 }
 
 std::string		Server::ft_getServerName()
