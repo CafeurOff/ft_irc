@@ -42,6 +42,8 @@ class Server
 		void	ft_kick_receive(std::string buffer, int client);
 		void	ft_privmsg(std::string buffer, int client);
 		void	ft_part_receive(std::string buffer, int client);
+		std::string ft_ParseChannel(std::string buffer);
+		std::string ft_ParseClient(std::string buffer);
 		/* Utils */
 		Channel 	*findChannel(std::string name);
 		Client 		*findClient(int fd);

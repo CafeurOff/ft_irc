@@ -6,6 +6,45 @@
 **	Parse the buffer and call the right function to handle the command
 */
 
+
+/*	ft_ParseChannel
+**	@param buffer : the buffer to parse
+**	@param client : the fd of the client
+**	Parse the buffer to get automatically the channel
+*/
+
+std::string Server::ft_ParseChannel(std::string buffer)
+{
+    std::string channel;
+
+    if (buffer.find("#", 0) != std::string::npos)
+    {
+        channel = buffer.substr(buffer.find("#", 0) + 1);
+        if (channel.find(" ", 0) != std::string::npos)
+            channel = channel.substr(0, channel.find(" ", 0));
+        if (channel.find("\n", 0) != std::string::npos)
+            channel.erase(channel.find("\n", 0));
+    }
+    return channel;
+}
+
+/*	ft_ParseClient
+**	@param buffer : the buffer to parse
+** Parse the buffer to get automatically the client who send the message
+*/
+std::string Server::ft_ParseClient(std::string buffer)
+{
+    std::string client;
+
+    if (buffer.find(" ") != std::string::npos && buffer.find(":") != std::string::npos)
+    {
+        client = buffer.substr(buffer.find(" ") + 1, buffer.find(":") - buffer.find(" ") - 1);
+        client.erase(client.find_last_not_of(" ") + 1);
+    }
+    return client;
+}
+
+
 void	Server::ft_parse_buffer(std::string buffer, int client)
 {
 	ft_getServerName();
@@ -207,7 +246,12 @@ void Server::ft_invite_receive(std::string buffer, int client)
 
 void	Server::ft_mode_receive(std::string buffer, int client)
 {
-	(void)buffer;
+	std::string	channel;
+	std::string	user;
+
+	channel = ft_ParseChannel(buffer);
+	user = ft_ParseClient(buffer);
+	std::cout << "Channel : " << channel << " User : " << user << std::endl;
 	(void)client;
 }
 
