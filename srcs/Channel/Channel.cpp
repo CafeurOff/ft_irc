@@ -6,6 +6,8 @@ Channel::Channel(const std::string name, Client *creator) : _name(name), _passwo
 	_regulars.insert(std::pair<std::string, Client*>(creator->getNickname() , creator));
 	_operators.insert(std::pair<std::string, Client*>(creator->getNickname() , creator));
 
+	sendMessage(creator, ":127.0.0.1 332 " + creator->getNickname() + " #" + _name + " :Welcome to the" + _name + "Channel!\n");
+
 	std::string joinMsg = ":" + creator->getNickname() + "!~" + creator->getUsername()[0] + "@127.0.0.1 JOIN #" + name + "\n";
 	sendMessage(creator, joinMsg);
 
@@ -26,6 +28,8 @@ Channel::Channel(std::string name, std::string password, Client *creator) : _nam
 {
 	_operators[creator->getNickname()] = creator;
 	_regulars[creator->getNickname()] = creator;
+
+	sendMessage(creator, ":127.0.0.1 332 " + creator->getNickname() + " #" + _name + " :Welcome to the" + _name + "Channel!\n");
 
 	std::string joinMsg = ":" + creator->getNickname() + "!~" + creator->getUsername()[0] + "@127.0.0.1 JOIN #" + name + "\n";
 	sendMessage(creator, joinMsg);
@@ -109,7 +113,7 @@ void Channel::addUser(Client* user, std::string password)
 		_regulars.insert(std::pair<std::string, Client*>(user->getNickname() , user));
 		_nUser++;
 		sendAllUser(user);
-		if (_restrictTopic == false)
+		if (_topic == "")
 			msg = ":127.0.0.1 331 " + user->getNickname() + " #" + _name + " :No topic set\n"; // RPL_NOTOPIC
 		else
 			msg = ":127.0.0.1 332 " + user->getNickname() + " #" + _name + " :" + _topic + "\n"; // RPL_TOPIC
@@ -208,6 +212,21 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
     // Notify the sender about the successful topic change
     sendNumericResponse(sender, "332", sender->getNickname(), _name); // RPL_TOPIC
     sendNumericResponse(sender, "333", sender->getNickname(), _name); // RPL_TOPICWHOTIME
+}
+
+void Channel::quitChannel(Client* client, std::string mess)
+{
+	std::map<std::string, Client*>::iterator it = _regulars.find(client->getNickname());
+	if (it != _regulars.end())
+	{
+		_regulars.erase(it);
+		_nUser--;
+	}
+	it = _operators.find(client->getNickname());
+	if (it != _operators.end())
+		_operators.erase(it);
+	std::string msg = ":" + client->getNickname() + "!~" + client->getUsername() + "@127.0.0.1" + " PART #" + _name + " :" + mess + "\n";
+	sendAll(msg);	
 }
 
 void Channel::checkMode(std::string **mess)
