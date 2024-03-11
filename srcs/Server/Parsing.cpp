@@ -275,6 +275,11 @@ void Server::ft_invite_receive(std::string buffer, int client)
 	{
 		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
 		return ;
+
+	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos || buffer.find(" ", 7) == std::string::npos)
+	{
+		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
+		return ;	
 	}
 	channel = buffer.substr(buffer.find("#", 0) + 1, buffer.find("\n", buffer.find("#", 0)) - (buffer.find("#", 0) + 1));
 	user = buffer.substr(7, buffer.find(" ",7) - 7);
@@ -302,6 +307,7 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 	std::string		channel;
 	Channel			*chan;
 
+
 	(void)mode;
 	(void)args;
 	(void)channel;
@@ -315,11 +321,13 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 		return ;
 	if (ft_verif_user(client) == 1)
 		return ;
+
 	if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
     {
         ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
         return ;
     }
+
 	buffer.erase(0, buffer.find_first_of(" ", 0) + 1);
 	if (buffer.empty() || buffer.find("#", 0) == std::string::npos)
 	{
@@ -343,6 +351,7 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 	}
 	buffer.erase(0, buffer.find_first_of(" ", 0) + 1);
 	std::cout << "MODE is :" << buffer << std::endl;
+	/*
 	if (chan->clientInChannel(findClient(client)) != 2 && buffer != "+b")
 	{
 		ft_send_error(client, 482, "MODE", "ERR_CHANOPRIVSNEEDED");
@@ -350,8 +359,7 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 	}
 	Dans le cas ou le client n'a pas les droits admin,
 	MAIS en faisant une cmd JOIN, konversation envoie une cmd MODE avec +b,
-	donc ne pas renvoyez d'erreur à ce moment là */
-
+	donc ne pas renvoyez d'erreur à ce moment là
 	/*
 	args = ft_count_args(buffer);
 	std::cout << "len:" << args << std::endl;
