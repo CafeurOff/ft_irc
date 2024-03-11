@@ -249,7 +249,19 @@ void Channel::checkMode(std::string **mess)
 	}
 }
 
-void Channel::modifMode(char modeSign, char modeChar, std::string &param)
+void Channel::checkMode(std::string *mess)
+{
+	std::string paramString;
+
+	std::cout << "Coucou" << std::endl;
+	char modeSign = mess[0][0];
+	char modeChar = mess[0][1];
+	if (mess[0].size() > 2)
+		paramString = mess[1];
+	modifMode(modeSign, modeChar, paramString);
+}
+
+void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
 {
 	if (modeSign == '+')
 	{
@@ -285,7 +297,7 @@ void Channel::modifMode(char modeSign, char modeChar, std::string &param)
             if (_limit == false)
             {
                 _limit = true;
-                _limit = std::atoi(param.c_str());
+                //_limitUser = param; atoi
             }
             //sendNumericResponse("346");
             //sendNumericResponse("347");
@@ -328,7 +340,7 @@ void Channel::modifMode(char modeSign, char modeChar, std::string &param)
             if (_limit == true)
             {
                 _limit = false;
-                _limit = 0;
+                _limitUser = 0;
             }
             //sendNumericResponse("346");
             //sendNumericResponse("347");

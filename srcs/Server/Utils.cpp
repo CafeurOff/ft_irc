@@ -13,6 +13,13 @@ void	Server::ft_privmsg(std::string buffer, int client)
     std::string message;
     std::string channel;
 
+    if (ft_verif_user(client) == 1)
+        return ;
+    if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
+    {
+        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
+        return ;
+    }
     if (buffer.find("#", 0) != std::string::npos)
     {
         channel = buffer.substr(9, buffer.find(" ", 0) - 10);
@@ -102,8 +109,33 @@ void Server::ft_welcome(int fd)
     send(fd, welcome.c_str(), welcome.length(), 0);
 }
 
-/*  ft_FindClientChannel
-**  Return all channel connected for a Client
-** @param fd : the file descriptor of the client
-*/
+int		Server::ft_count_args(std::string buffer)
+{
+	int	count(0);
 
+	for (size_t i = 0; i < buffer.length(); ++i) {
+			if (buffer[i] == ' ') {
+				count++;
+			}
+    }	return (count);
+}
+
+int		Server::ft_verif_empty(std::string buffer, std::string cmd, int client)
+{
+	if (buffer.length() - 1 <= cmd.length())
+	{
+		ft_send_error(client, 461, cmd, "ERR_NEEDMOREPARAMS");
+		return (1);
+	}
+	return (0);
+}
+
+int Server::ft_verif_user(int client)
+{
+    if (findFd(client) == -1)
+    {
+        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
+        return (1);
+    }
+    return (0);
+}
