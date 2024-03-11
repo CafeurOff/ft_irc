@@ -57,30 +57,6 @@ class Server
 		void		ft_send_error(int fd, int error, std::string command, std::string type);
 		void		SendMessage(int fd, const std::string& sender, const std::string& message);
 		void 		SendMessageToChannel(const std::string& channel, Client* sender, const std::string& message);
-
-		/*void Channel::addChannel(std::string const &name, Client* client)
-		{
-			Channel(name) channel1;
-			if (_channel.find(name) != _channel.end())
-			{
-				//ERROR
-				return ;
-			}
-			_channels.insert(std::pair(name, channel1));
-			channel1.createChannel(name, client);
-		}
-
-		void Channel::addChannelPassword(std::string const &name, std::string const &password, Client* client)
-		{
-			Channel(name, password) channel1;
-			if (_channel.find(name) != _channel.end())
-			{
-				//ERROR
-				return ;
-			}
-			_channels.insert(std::pair(name, channel1));
-			channel1.createChannel(name, client);
-		}*/
 	private:
 		int		_port;
 		int 	_opt;
