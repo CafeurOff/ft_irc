@@ -36,14 +36,23 @@ void	Server::ft_verif_pass(std::string buffer, int client)
 	if (pass.compare(0, _password.length() + 1, _password) == 0)
 	{
 		if (findFd(client) != -1)
+		{
 			ft_send_error(client, 462, "PASS", "ERR_ALREADYREGISTRED");
+			return ;
+		}
 		else
 			_client.insert(std::pair<int, Client>(client , Client(client)));
 	}
 	else if (pass.length() == 0)
+	{
 		ft_send_error(client, 461, "PASS", "ERR_NEEDMOREPARAMS");
+		return ;
+	}
 	else
+	{
 		ft_send_error(client, 464, "PASS", "ERR_PASSWDMISMATCH");
+		return ;
+	}
 }
 
 /*	ft_nick_receive
@@ -61,13 +70,25 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 		return ;
 	nick = buffer.substr(5, buffer.length() - 6);
 	if (findFd(client) == -1)
+	{
 		ft_send_error(client, 464, "PASS", "ERR_PASSWDMISMATCH");
+		return ;
+	}
 	if (buffer.length() <= 7)
+	{
 		ft_send_error(client, 431, "NICK", "ERR_NONICKNAMEGIVEN");
+		return ;
+	}
 	if (nick.find_first_of("*:@,!? ", 0) != std::string::npos)
+	{
 		ft_send_error(client, 432, "NICK", "ERR_ERRONEUSNICKNAME");
+		return ;
+	}
 	if (findFdByNickname(nick) != -1)
+	{
 		ft_send_error(client, 433, "NICK", "ERR_NICKNAMEINUSE");
+		return ;
+	}
 	else
 	{
 		user = findClient(client);
@@ -173,7 +194,10 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 	if (ft_verif_empty(buffer, "TOPIC ", client))
 		return ;
 	if (buffer.find("#", 0) == std::string::npos)
+	{
 		ft_send_error(client, 461, "TOPIC", "ERR_NEEDMOREPARAMS");
+		return ;
+	}
 	if (buffer.find(":", 0) != std::string::npos)
 	{
 		channel = buffer.substr(7, buffer.find(" ", 6) - 6);
@@ -201,7 +225,10 @@ void	Server::ft_invite_receive(std::string buffer, int client)
 	if (ft_verif_empty(buffer, "INVITE ", client))
 		return ;
 	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos || buffer.find(" ", 7) == std::string::npos)
+	{
 		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
+		return ;
+	}
 	channel = buffer.substr(buffer.find("#", 0) + 1, buffer.length() - buffer.find("#", 0) + 1);
 	user = buffer.substr(7, buffer.find(" ",7) - 7);
 	chan = findChannel(channel);
@@ -292,7 +319,10 @@ void	Server::ft_kick_receive(std::string buffer, int client)
 	if (ft_verif_empty(buffer, "KICK ", client))
 		return ;
 	if (buffer.find("#", 0) == std::string::npos)
+	{
 		ft_send_error(client, 461, "KICK", "ERR_NEEDMOREPARAMS");
+		return ;
+	}
 	if (buffer.find(":", 0) != std::string::npos)
 	{
 		channel = buffer.substr(6, buffer.find(" ", 5) - 6);
@@ -316,7 +346,10 @@ void	Server::ft_part_receive(std::string buffer, int client)
 	if (ft_verif_empty(buffer, "PART ", client))
 		return ;
 	if (buffer.find("#", 0) == std::string::npos)
+	{
 		ft_send_error(client, 461, "PART", "ERR_NEEDMOREPARAMS");
+		return ;
+	}
 	if (buffer.find(":", 0) != std::string::npos)
 		channel = buffer.substr(6, buffer.find(" ", 5) - 6);
 	else
