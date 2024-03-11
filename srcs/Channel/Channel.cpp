@@ -160,8 +160,7 @@ void Channel::invite(Client* sender, Client* newUser) {
 
 	// Check if the target user is already in the channel
 	if (_regulars.find(newUser->getNickname()) != _regulars.end()) {
-		// CHANGE HERE THE ERROR MESSAGE DON'T WORK
-		sendNumericResponse(sender, "443", sender->getNickname(), _name);
+		sendNumericResponse(sender, "443", newUser->getNickname(), _name);
 		return;
 	}
 
@@ -342,4 +341,15 @@ void Channel::SendAllFD(const std::string& message, int fd)
 		if (it->second->getFd() != fd)
 			sendMessage(it->second, message);
 	}
+}
+
+int Channel::clientInChannel(Client *user)
+{
+	std::map<std::string, Client*>::iterator it = _operators.begin();//find(user->getNickname());
+	if (it != _operators.end())
+		return (2);
+	it = _regulars.find(user->getNickname());
+	if (it != _regulars.end())
+		return (1);
+	return (0);
 }

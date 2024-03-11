@@ -19,6 +19,8 @@ void	Server::ft_parse_buffer(std::string buffer, int client)
     std::map<std::string, CommandFunction>::iterator it = commandFunctions.find(command);
 	if (it != commandFunctions.end())
 		(this->*(it->second))(buffer, client);
+	else
+		ft_send_error(client, 421, "COMMAND", "ERR_UNKNOWNCOMMAND");
 }
 
 /*	ft_verif_pass
@@ -69,7 +71,6 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 		user = findClient(client);
 		user->setNickname(nick);
 	}
-	ft_welcome(client);
 }
 
 /*	ft_user_receive
@@ -91,6 +92,7 @@ void	Server::ft_user_receive(std::string buffer, int client)
 		user = findClient(client);
 		user->setUsername(username);
 	}
+	ft_welcome(client);
 }
 
 /*	ft_quit_user
@@ -102,12 +104,14 @@ void	Server::ft_user_receive(std::string buffer, int client)
 void	Server::ft_quit_user(std::string buffer, int client)
 {
 	std::string msg;
+
 	std::map<int, Client>::iterator it = _client.find(client);
 
 	if (it != _client.end())
 	{
 		msg = ":" + it->second.getNickname() + " QUIT :" + buffer.substr(6, buffer.length() - 7) + "\r\n";
 		// send to all clients
+		std::cout << chan << std::endl;
 		_client.erase(it);
 	}
 }
@@ -192,12 +196,11 @@ void Server::ft_invite_receive(std::string buffer, int client)
 	user = buffer.substr(7, buffer.find(" ",7) - 7);
 	chan = findChannel(channel);
 	newUser = findClient(findFdByNickname(user));
-	std::cout << channel << std::endl;
 	if (chan && newUser)
 		chan->invite(findClient(client), newUser);
+	else
+		ft_send_error(client, 401, "INVITE", "ERR_NOSUCHNICK");
 }
-
-
 
 /*	ft_mode_receive
 **	@param buffer : the buffer to parse
@@ -224,7 +227,10 @@ void	Server::ft_kick_receive(std::string buffer, int client)
 	Channel	*chan;
 
 	if (buffer.find("#", 0) == std::string::npos)
+	{
 		ft_send_error(client, 461, "KICK", "ERR_NEEDMOREPARAMS");
+		return ;
+	}
 	if (buffer.find(":", 0) != std::string::npos)
 	{
 		channel = buffer.substr(6, buffer.find(" ", 5) - 6);
