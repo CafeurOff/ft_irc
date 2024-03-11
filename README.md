@@ -24,5 +24,3 @@ Bienvenue dans le projet ft_irc ! Ce projet consiste à implémenter un serveur 
 - [roroca](https://github.com/Yamennes)
 - [ybellocq](https://github.com/Ybellocq)
 - [cgeoffra](https://github.com/cassy25)
-
-**Note:** Assurez-vous de mettre à jour les liens, les noms d'utilisateurs et les informations spécifiques à votre projet dans le README. N'hésitez pas à ajouter des sections supplémentaires si nécessaire, comme une section de dépannage, de captures d'écran, etc.

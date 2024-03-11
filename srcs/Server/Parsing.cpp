@@ -69,7 +69,6 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 		user = findClient(client);
 		user->setNickname(nick);
 	}
-	ft_welcome(client);
 }
 
 /*	ft_user_receive
@@ -91,6 +90,7 @@ void	Server::ft_user_receive(std::string buffer, int client)
 		user = findClient(client);
 		user->setUsername(username);
 	}
+	ft_welcome(client);
 }
 
 /*	ft_quit_user
@@ -101,15 +101,24 @@ void	Server::ft_user_receive(std::string buffer, int client)
 
 void	Server::ft_quit_user(std::string buffer, int client)
 {
-	std::string msg;
-	std::map<int, Client>::iterator it = _client.find(client);
+	std::string	message;
+	Client		*user;
 
-	if (it != _client.end())
+	if (buffer.find(":", 0) != std::string::npos)
+		message = buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":", 0) - 2);
+	else
+		message = "Client Quit";
+	user = findClient(client);
+	if (user)
 	{
-		msg = ":" + it->second.getNickname() + " QUIT :" + buffer.substr(6, buffer.length() - 7) + "\r\n";
-		// send to all clients
-		_client.erase(it);
+		std::map<std::string, Channel>::iterator it;
+		for (it = _channel.begin(); it != _channel.end(); ++it)
+			it->second.quitChannel(user, message);
+		_client.erase(client);
 	}
+	else
+		ft_send_error(client, 451, "QUIT", "ERR_NOTREGISTERED");
+
 }
 
 /*	ft_join_receive
@@ -164,7 +173,7 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 		ft_send_error(client, 461, "TOPIC", "ERR_NEEDMOREPARAMS");
 	if (buffer.find(":", 0) != std::string::npos)
 	{
-		channel = buffer.substr(7, buffer.find(" ", 6) - 6);
+		channel = buffer.substr(7, buffer.find(" ", 6) - 7);
 		newTopic = buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":",0));
 	}
 	else
@@ -179,10 +188,23 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 **	Invite a user to a channel
 */
 
-void	Server::ft_invite_receive(std::string buffer, int client)
+void Server::ft_invite_receive(std::string buffer, int client)
 {
-	(void)buffer;
-	(void)client;
+	std::string	channel;
+	std::string	user;
+	Channel	*chan;
+	Client	*newUser;
+
+	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos || buffer.find(" ", 7) == std::string::npos)
+		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
+	channel = buffer.substr(buffer.find("#", 0) + 1, buffer.find("\n", buffer.find("#", 0)) - (buffer.find("#", 0) + 1));
+	user = buffer.substr(7, buffer.find(" ",7) - 7);
+	chan = findChannel(channel);
+	newUser = findClient(findFdByNickname(user));
+	if (chan && newUser)
+		chan->invite(findClient(client), newUser);
+	else
+		ft_send_error(client, 401, "INVITE", "ERR_NOSUCHNICK");
 }
 
 /*	ft_mode_receive
@@ -210,7 +232,10 @@ void	Server::ft_kick_receive(std::string buffer, int client)
 	Channel	*chan;
 
 	if (buffer.find("#", 0) == std::string::npos)
+	{
 		ft_send_error(client, 461, "KICK", "ERR_NEEDMOREPARAMS");
+		return ;
+	}
 	if (buffer.find(":", 0) != std::string::npos)
 	{
 		channel = buffer.substr(6, buffer.find(" ", 5) - 6);
@@ -239,6 +264,8 @@ void	Server::ft_part_receive(std::string buffer, int client)
 		channel = buffer.substr(6, buffer.length() - 7);
 	chan = findChannel(channel);
 	chan->quitChannel(findClient(client), buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":", 0) - 2));
+	if (chan->getNBUser() == 0)
+		_channel.erase(channel);
 }
 
 /*	ft_send_error

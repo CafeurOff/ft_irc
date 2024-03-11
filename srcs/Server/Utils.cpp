@@ -35,8 +35,12 @@ void	Server::ft_privmsg(std::string buffer, int client)
     else
     {
         if (findFdByNickname(receiver) == -1)
+        {
             ft_send_error(client ,401, "ERROR", "ERR_NOSUCHNICK");
-        SendMessage(findFdByNickname(receiver), user->getNickname(), message);
+            return ;
+        }
+        else
+            SendMessage(findFdByNickname(receiver), user->getNickname(), message);
     }
 }
 
@@ -97,3 +101,9 @@ void Server::ft_welcome(int fd)
     std::string welcome = findClient(fd)->getNickname() + " :Welcome to the " + ft_getServerName() + " Network, " + findClient(fd)->getNickname() + "!" + findClient(fd)->getUsername() + "@" + ft_getServerName() + "\n";
     send(fd, welcome.c_str(), welcome.length(), 0);
 }
+
+/*  ft_FindClientChannel
+**  Return all channel connected for a Client
+** @param fd : the file descriptor of the client
+*/
+

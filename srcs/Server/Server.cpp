@@ -1,5 +1,6 @@
 #include "../../inc/Server.hpp"
 
+bool ServerUp = true;
 /*	Constructor
 **	@param av : the arguments of the server
 **	Set all commands for my map
@@ -7,21 +8,21 @@
 
 Server::Server(char **av)
 {
-	  _socket = socket(AF_INET, SOCK_STREAM, 0);
-	  _opt = 1;
-	  _port = atoi(av[1]);
-	  _password = av[2];
+	_socket = socket(AF_INET, SOCK_STREAM, 0);
+	_opt = 1;
+	_port = atoi(av[1]);
+	_password = av[2];
 
-    commandFunctions["PASS"] = &Server::ft_verif_pass;
-    commandFunctions["NICK"] = &Server::ft_nick_receive;
-    commandFunctions["USER"] = &Server::ft_user_receive;
+	commandFunctions["PASS"] = &Server::ft_verif_pass;
+	commandFunctions["NICK"] = &Server::ft_nick_receive;
+	commandFunctions["USER"] = &Server::ft_user_receive;
     commandFunctions["QUIT"] = &Server::ft_quit_user;
     commandFunctions["JOIN"] = &Server::ft_join_receive;
     commandFunctions["MODE"] = &Server::ft_mode_receive;
     commandFunctions["TOPIC"] = &Server::ft_topic_receive;
     commandFunctions["INVITE"] = &Server::ft_invite_receive;
-	  commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
-	  commandFunctions["KICK"] = &Server::ft_kick_receive;
+	commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
+	commandFunctions["KICK"] = &Server::ft_kick_receive;
   	commandFunctions["PART"] = &Server::ft_part_receive;
 }
 
@@ -31,8 +32,21 @@ Server::Server(char **av)
 
 Server::~Server()
 {
-	close(_socket);
-	close(_new_socket);
+}
+
+/*	ft_sigint
+**	@param sig : the signal
+**	Handle the signal SIGINT
+** 	Set the server to false
+*/
+
+void	ft_sigint(int sig)
+{
+	if (sig == SIGINT)
+	{
+		std::cout << "Server is shutting down" << std::endl;
+		ServerUp = false;
+	}
 }
 
 /*	Launch
@@ -48,9 +62,15 @@ void	Server::Launch()
 	pstruct[0].events = POLLIN | POLLPRI;
 	int	nb_client = 0;
 
-	while (1)
+	struct sigaction act;
+	act.sa_flags = 0;
+	sigemptyset(&act.sa_mask);
+	act.sa_handler = &ft_sigint;
+	sigaction(SIGINT, &act, NULL);
+
+	while (ServerUp)
 	{
-		int rc = poll(pstruct, nb_client + 1, 0);
+		int rc = poll(pstruct, nb_client + 1, 5000);
 		if (rc > 0)
 		{
 			if (pstruct[0].revents & POLLIN)
@@ -123,7 +143,6 @@ void	Server::Init()
 		std::cerr << "listen failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	Launch();
 }
 
 std::string		Server::ft_getServerName()
