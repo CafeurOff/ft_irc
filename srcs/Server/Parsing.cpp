@@ -218,30 +218,63 @@ void	Server::ft_invite_receive(std::string buffer, int client)
 
 void	Server::ft_mode_receive(std::string buffer, int client)
 {
-	//std::string **param;
-	std::string	channel;
-	Channel	*chan;
+	std::string 	mode;
+	size_t			args;
+	std::string		channel;
+	Channel			*chan;
 
 	if (ft_verif_empty(buffer, "MODE ", client))
 		return ;
-	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos)
+	buffer.erase(0, buffer.find_first_of(" ", 0) + 1);
+	if (buffer.empty() || buffer.find("#", 0) == std::string::npos)
 	{
 		ft_send_error(client, 461, "MODE", "ERR_NEEDMOREPARAMS");
 		return ;
 	}
-	if (buffer.find(" ", 5) == std::string::npos)
+	if (buffer.find_first_of(" ", 0) == std::string::npos)
 		return ;
-	channel = buffer.substr(buffer.find("#", 0) + 1, buffer.find(" ", 5) - 6);
+	channel = buffer.substr(1,buffer.find_first_of(" ", 0) - 1);
+	std::cout << "Chan is :" << channel << std::endl;
 	chan = findChannel(channel);
-	if (chan->clientInChannel(findClient(client)) == 0)
+	if (chan == NULL)
 	{
 		ft_send_error(client, 403, "MODE", "ERR_NOSUCHCHANNEL");
 		return ;
 	}
-	if (buffer.substr(buffer.find(" ", 5) + 1, buffer.length()) == "+b")
+	if (chan->clientInChannel(findClient(client)) == 0)
+	{
+		ft_send_error(client, 441, "MODE", "ERR_USERNOTINCHANNEL");
 		return ;
-	std::cout << buffer.substr(buffer.find(" ", 5) + 1, buffer.length()) << std::endl;
-	
+	}
+	buffer.erase(0, buffer.find_first_of(" ", 0) + 1);
+	std::cout << "MODE is :" << buffer << std::endl;
+	/*
+	if (chan->clientInChannel(findClient(client)) != 2 && buffer != "+b")
+	{
+		ft_send_error(client, 482, "MODE", "ERR_CHANOPRIVSNEEDED");
+		return ;
+	}
+	Dans le cas ou le client n'a pas les droits admin,
+	MAIS en faisant une cmd JOIN, konversation envoie une cmd MODE avec +b,
+	donc ne pas renvoyez d'erreur à ce moment là*/
+	args = ft_count_args(buffer);
+	std::cout << "len:" << args << std::endl;
+	if (args == 0)
+	{
+		std::cout << "mode len:" << buffer.length() << std::endl;
+		chan->checkMode(&buffer);
+	}
+	else
+	{
+		std::string *param = new std::string[args + 1];
+		for (size_t i = 0; i <= args; i++)
+		{
+			param[i] = buffer.substr(0, buffer.find(" ", 0));
+			buffer.erase(0, buffer.find(" ", 0));
+			std::cout << "mode :" << param[i] << std::endl;
+		}
+		chan->checkMode(param);
+	}
 }
 
 /*	ft_kick_receive
@@ -320,4 +353,15 @@ int		Server::ft_verif_empty(std::string buffer, std::string cmd, int client)
 		return (1);
 	}
 	return (0);
+}
+
+int		Server::ft_count_args(std::string buffer)
+{
+	int	count(0);
+
+	for (size_t i = 0; i < buffer.length(); ++i) {
+			if (buffer[i] == ' ') {
+				count++;
+			}
+    }	return (count);
 }

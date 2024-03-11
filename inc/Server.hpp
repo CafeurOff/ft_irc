@@ -50,6 +50,7 @@ class Server
 		int 		findFd(int fd);
 		int 		findChannelByName(const std::string& name);
 		void		ft_welcome(int fd);
+		int			ft_count_args(std::string buffer);
 
 		/* Sender */
 		void		ft_send_error(int fd, int error, std::string command, std::string type);

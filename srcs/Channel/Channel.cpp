@@ -229,23 +229,16 @@ void Channel::quitChannel(Client* client, std::string mess)
 	sendAll(msg);	
 }
 
-void Channel::checkMode(std::string **mess)
+void Channel::checkMode(std::string *mess)
 {
-	size_t i = 0;
+	std::string paramString;
 
-	while (mess[i] != NULL)
-	{
-		std::string modeString = *mess[i];
-		std::string paramString;
-		if (modeString.size() < 2)
-			continue;
-		char modeSign = modeString[0];
-		char modeChar = modeString[0];
-		if (modeString.size() > 2)
-			paramString = modeString[1];
-		modifMode(modeSign, modeChar, paramString);
-		i++;
-	}
+	std::cout << "Coucou" << std::endl;
+	char modeSign = mess[0][0];
+	char modeChar = mess[0][1];
+	if (mess[0].size() > 2)
+		paramString = mess[1];
+	modifMode(modeSign, modeChar, paramString);
 }
 
 void Channel::modifMode(char modeSign, char modeChar, const std::string &param)

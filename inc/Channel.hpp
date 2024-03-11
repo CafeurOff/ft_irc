@@ -50,7 +50,7 @@ class Channel
 		void topic(Client* sender, const std::string& newTopic);
 		void quitChannel(Client* client, std::string mess);
 		/* Mode */
-		void checkMode(std::string **mess);
+		void checkMode(std::string *mess);
 		void modifMode(char modeSign, char modeChar, const std::string &param);
 		void setPassword(std::string param);
 };
