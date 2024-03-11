@@ -30,6 +30,8 @@ void	Server::ft_parse_buffer(std::string buffer, int client)
 void	Server::ft_verif_pass(std::string buffer, int client)
 {
 	std::string pass;
+	if (ft_verif_empty(buffer, "PASS :", client))
+		return ;
 	pass = buffer.substr(6, buffer.length() - 7);
 	if (pass.compare(0, _password.length() + 1, _password) == 0)
 	{
@@ -55,6 +57,8 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 	std::string	nick;
 	Client	*user;
 
+	if (ft_verif_empty(buffer, "NICK ", client))
+		return ;
 	nick = buffer.substr(5, buffer.length() - 6);
 	if (findFd(client) == -1)
 		ft_send_error(client, 464, "PASS", "ERR_PASSWDMISMATCH");
@@ -83,6 +87,8 @@ void	Server::ft_user_receive(std::string buffer, int client)
 	std::string	username;
 	Client	*user;
 
+	if (ft_verif_empty(buffer, "USER ", client))
+		return ;
 	username = buffer.substr(5, buffer.length() - 6);
 	if (username.find_first_of(" ", 0) != std::string::npos)
 		username.erase(username.find_first_of(" ", 0), username.length());
@@ -104,6 +110,8 @@ void	Server::ft_quit_user(std::string buffer, int client)
 	std::string msg;
 	std::map<int, Client>::iterator it = _client.find(client);
 
+	if (ft_verif_empty(buffer, "QUIT :", client))
+		return ;
 	if (it != _client.end())
 	{
 		msg = ":" + it->second.getNickname() + " QUIT :" + buffer.substr(6, buffer.length() - 7) + "\r\n";
@@ -124,6 +132,8 @@ void	Server::ft_join_receive(std::string buffer, int client)
 	std::string password;
 	Channel	*chan;
 
+	if (ft_verif_empty(buffer, "JOIN ", client))
+		return ;
 	if (buffer.find("#", 0) != std::string::npos)
 	{
 		if (buffer.find(" ", 5) != std::string::npos)
@@ -160,6 +170,8 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 	std::string	newTopic;
 	Channel	*chan;
 
+	if (ft_verif_empty(buffer, "TOPIC ", client))
+		return ;
 	if (buffer.find("#", 0) == std::string::npos)
 		ft_send_error(client, 461, "TOPIC", "ERR_NEEDMOREPARAMS");
 	if (buffer.find(":", 0) != std::string::npos)
@@ -186,6 +198,8 @@ void	Server::ft_invite_receive(std::string buffer, int client)
 	Channel	*chan;
 	Client	*newUser;
 
+	if (ft_verif_empty(buffer, "INVITE ", client))
+		return ;
 	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos || buffer.find(" ", 7) == std::string::npos)
 		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
 	channel = buffer.substr(buffer.find("#", 0) + 1, buffer.length() - buffer.find("#", 0) + 1);
@@ -208,6 +222,8 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 	std::string	channel;
 	Channel	*chan;
 
+	if (ft_verif_empty(buffer, "MODE ", client))
+		return ;
 	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos)
 	{
 		ft_send_error(client, 461, "MODE", "ERR_NEEDMOREPARAMS");
@@ -225,6 +241,7 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 	if (buffer.substr(buffer.find(" ", 5) + 1, buffer.length()) == "+b")
 		return ;
 	std::cout << buffer.substr(buffer.find(" ", 5) + 1, buffer.length()) << std::endl;
+	
 }
 
 /*	ft_kick_receive
@@ -239,6 +256,8 @@ void	Server::ft_kick_receive(std::string buffer, int client)
 	std::string	user;
 	Channel	*chan;
 
+	if (ft_verif_empty(buffer, "KICK ", client))
+		return ;
 	if (buffer.find("#", 0) == std::string::npos)
 		ft_send_error(client, 461, "KICK", "ERR_NEEDMOREPARAMS");
 	if (buffer.find(":", 0) != std::string::npos)
@@ -261,6 +280,8 @@ void	Server::ft_part_receive(std::string buffer, int client)
 	std::string	channel;
 	Channel	*chan;
 
+	if (ft_verif_empty(buffer, "PART ", client))
+		return ;
 	if (buffer.find("#", 0) == std::string::npos)
 		ft_send_error(client, 461, "PART", "ERR_NEEDMOREPARAMS");
 	if (buffer.find(":", 0) != std::string::npos)
@@ -289,4 +310,14 @@ void	Server::ft_send_error(int fd, int error, std::string command, std::string t
 	error_message = " :" + type;
 	error_send = ":" + _servername + " " + error_code + " " + command + error_message + "\r\n";
 	send(fd, error_send.c_str(), error_send.length(), 0);
+}
+
+int		Server::ft_verif_empty(std::string buffer, std::string cmd, int client)
+{
+	if (buffer.length() - 1 <= cmd.length())
+	{
+		ft_send_error(client, 461, cmd, "ERR_NEEDMOREPARAMS");
+		return (1);
+	}
+	return (0);
 }

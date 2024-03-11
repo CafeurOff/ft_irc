@@ -55,7 +55,7 @@ class Server
 		void		ft_send_error(int fd, int error, std::string command, std::string type);
 		void		SendMessage(int fd, const std::string& sender, const std::string& message);
 		void 		SendMessageToChannel(const std::string& channel, Client* sender, const std::string& message);
-
+		int			ft_verif_empty(std::string buffer, std::string cmd, int client);
 		/*void Channel::addChannel(std::string const &name, Client* client)
 		{
 			Channel(name) channel1;
