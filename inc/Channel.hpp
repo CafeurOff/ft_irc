@@ -34,6 +34,7 @@ class Channel
 		/* Getter */
 		const std::string &getName() const;
 		int clientInChannel(Client *user);
+		int getNBUser(void);
 		/* Sender */
 		void sendNumericResponse(Client* client, const std::string& code, const std::string& param1, const std::string& param2);
 		void SendAllFD(const std::string& message, int fd);

@@ -57,6 +57,11 @@ const std::string& Channel::getName() const
 	return (_name);
 }
 
+int	Channel::getNBUser(void)
+{
+	return (_nUser);
+}
+
 void Channel::sendNumericResponse(Client* client, const std::string& code, const std::string& param1, const std::string& param2)
 {
 	std::string message = ":127.0.0.1 " + code + " " + param1 + " ";
@@ -217,9 +222,12 @@ void Channel::quitChannel(Client* client, std::string mess)
 	}
 	it = _operators.find(client->getNickname());
 	if (it != _operators.end())
+	{
 		_operators.erase(it);
+		_nUser--;
+	}
 	std::string msg = ":" + client->getNickname() + "!~" + client->getUsername() + "@127.0.0.1" + " PART #" + _name + " :" + mess + "\n";
-	sendAll(msg);
+	sendAll(msg);		
 }
 
 void Channel::checkMode(std::string **mess)

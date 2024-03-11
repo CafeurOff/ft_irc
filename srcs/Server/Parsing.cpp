@@ -19,8 +19,6 @@ void	Server::ft_parse_buffer(std::string buffer, int client)
     std::map<std::string, CommandFunction>::iterator it = commandFunctions.find(command);
 	if (it != commandFunctions.end())
 		(this->*(it->second))(buffer, client);
-	else
-		ft_send_error(client, 421, "COMMAND", "ERR_UNKNOWNCOMMAND");
 }
 
 /*	ft_verif_pass
@@ -103,17 +101,24 @@ void	Server::ft_user_receive(std::string buffer, int client)
 
 void	Server::ft_quit_user(std::string buffer, int client)
 {
-	std::string msg;
+	std::string	message;
+	Client		*user;
 
-	std::map<int, Client>::iterator it = _client.find(client);
-
-	if (it != _client.end())
+	if (buffer.find(":", 0) != std::string::npos)
+		message = buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":", 0) - 2);
+	else
+		message = "Client Quit";
+	user = findClient(client);
+	if (user)
 	{
-		msg = ":" + it->second.getNickname() + " QUIT :" + buffer.substr(6, buffer.length() - 7) + "\r\n";
-		// send to all clients
-		std::cout << chan << std::endl;
-		_client.erase(it);
+		std::map<std::string, Channel>::iterator it;
+		for (it = _channel.begin(); it != _channel.end(); ++it)
+			it->second.quitChannel(user, message);
+		_client.erase(client);
 	}
+	else
+		ft_send_error(client, 451, "QUIT", "ERR_NOTREGISTERED");
+
 }
 
 /*	ft_join_receive
@@ -259,6 +264,8 @@ void	Server::ft_part_receive(std::string buffer, int client)
 		channel = buffer.substr(6, buffer.length() - 7);
 	chan = findChannel(channel);
 	chan->quitChannel(findClient(client), buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":", 0) - 2));
+	if (chan->getNBUser() == 0)
+		_channel.erase(channel);
 }
 
 /*	ft_send_error
