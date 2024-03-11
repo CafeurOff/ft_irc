@@ -39,3 +39,4 @@ void Client::setUsername(const std::string &username)
 {
     _username = username;
 }
+
