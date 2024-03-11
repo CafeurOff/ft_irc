@@ -52,7 +52,9 @@ class Server
 		int 		findFd(int fd);
 		int 		findChannelByName(const std::string& name);
 		void		ft_welcome(int fd);
-
+		int 		ft_verif_empty(std::string buffer, std::string cmd, int client);
+		int 		ft_count_args(std::string buffer);
+		int 		ft_verif_user(int client);
 		/* Sender */
 		void		ft_send_error(int fd, int error, std::string command, std::string type);
 		void		SendMessage(int fd, const std::string& sender, const std::string& message);
