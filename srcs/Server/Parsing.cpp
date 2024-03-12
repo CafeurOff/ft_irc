@@ -68,6 +68,7 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 
 	if (ft_verif_empty(buffer, "NICK ", client))
 		return ;
+	nick = buffer.substr(5, buffer.length() - 6);
 	if (findFd(client) == -1)
 	{
 		ft_send_error(client, 464, "PASS", "ERR_PASSWDMISMATCH");
