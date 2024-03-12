@@ -326,28 +326,6 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
             //sendNumericResponse("346");
             //sendNumericResponse("347");
         }
-		else if (modeChar == 'o') //Retirer le privilege d'operateur
-        {
-            if (_regulars.find(param) != _regulars.end())
-                return ;
-            std::map<std::string, Client*>::iterator it = _operators.find(param);
-            if (it != _operators.end())
-            {
-                Client* user = it->second;
-                _operators.erase(it);
-                _regulars[param] = user;
-            }
-        }
-        else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
-        {
-            if (_limit == true)
-            {
-                _limit = false;
-                _limit = 0;
-            }
-            //sendNumericResponse("346");
-            //sendNumericResponse("347");
-        }
 	}
 }
 
