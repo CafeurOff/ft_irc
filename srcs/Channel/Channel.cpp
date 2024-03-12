@@ -170,17 +170,11 @@ void Channel::invite(Client* sender, Client* newUser) {
 		return;
 	}
 
-	//Check if the target existed
-	if ()
-
     // Send a message to the target user asking them to join the channel
     if (newUser != NULL) {
 		std::string inviteMessage = ":" + sender->getNickname() + "!~" + sender->getUsername() + "@127.0.0.1" + " INVITE " + newUser->getNickname() + " :" + _name + "\n";
 		sendMessage(newUser, inviteMessage);
-    } else {
-        sendNumericResponse(sender, "401", sender->getNickname(), "ERR_NOSUCHNICK"); // ERR_NOSUCHNICK
-		std::cout << "no such nick" << std::endl;
-    } //NE FONCTIONNE PAS
+    }
 }
 
 
