@@ -137,11 +137,6 @@ void	Server::ft_quit_user(std::string buffer, int client)
 		return ;
 	if (ft_verif_user(client) == 1)
 		return ;
-	if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
-    {
-        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
-        return ;
-    }
 	if (buffer.find(":", 0) != std::string::npos)
 		message = buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":", 0) - 2);
 	else
@@ -152,7 +147,6 @@ void	Server::ft_quit_user(std::string buffer, int client)
 		std::map<std::string, Channel>::iterator it;
 		for (it = _channel.begin(); it != _channel.end(); ++it)
 			it->second.quitChannel(user, message);
-		// Check if channel is empty and delete it
 		_client.erase(client);
 	}
 	else
@@ -231,7 +225,7 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 	if (buffer.find("#", 0) == std::string::npos)
 	{
 		ft_send_error(client, 461, "TOPIC", "ERR_NEEDMOREPARAMS");
-		return ;
+		return ;	
 	}
 	if (buffer.find(":", 0) != std::string::npos)
 	{
@@ -266,16 +260,6 @@ void Server::ft_invite_receive(std::string buffer, int client)
 		return ;
 	if (ft_verif_user(client) == 1)
 		return ;
-	if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
-    {
-        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
-        return ;
-    }
-	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos || buffer.find(" ", 7) == std::string::npos)
-	{
-		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
-		return ;
-
 	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos || buffer.find(" ", 7) == std::string::npos)
 	{
 		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
@@ -307,27 +291,10 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 	std::string		channel;
 	Channel			*chan;
 
-
-	(void)mode;
-	(void)args;
-	(void)channel;
-	(void)chan;
-	(void)client;
-	(void)buffer;
-
-
-	/*
 	if (ft_verif_empty(buffer, "MODE ", client))
 		return ;
 	if (ft_verif_user(client) == 1)
 		return ;
-
-	if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
-    {
-        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
-        return ;
-    }
-
 	buffer.erase(0, buffer.find_first_of(" ", 0) + 1);
 	if (buffer.empty() || buffer.find("#", 0) == std::string::npos)
 	{
@@ -359,8 +326,7 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 	}
 	Dans le cas ou le client n'a pas les droits admin,
 	MAIS en faisant une cmd JOIN, konversation envoie une cmd MODE avec +b,
-	donc ne pas renvoyez d'erreur à ce moment là
-	/*
+	donc ne pas renvoyez d'erreur à ce moment là*/
 	args = ft_count_args(buffer);
 	std::cout << "len:" << args << std::endl;
 	if (args == 0)
@@ -379,7 +345,6 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 		}
 		chan->checkMode(param);
 	}
-	*/
 }
 
 /*	ft_kick_receive
@@ -398,11 +363,6 @@ void	Server::ft_kick_receive(std::string buffer, int client)
 		return ;
 	if (ft_verif_user(client) == 1)
 		return ;
-	if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
-    {
-        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
-        return ;
-    }
 	if (buffer.find("#", 0) == std::string::npos)
 	{
 		ft_send_error(client, 461, "KICK", "ERR_NEEDMOREPARAMS");
@@ -419,19 +379,9 @@ void	Server::ft_kick_receive(std::string buffer, int client)
 		user = buffer.substr(buffer.find(" ", 5) + 1, buffer.length() - buffer.find(" ", 5) - 2);
 	}
 	chan = findChannel(channel);
-	if (chan == NULL)
-	{
-		ft_send_error(client, 403, "KICK", "ERR_NOSUCHCHANNEL");
-		return ;
-	}
 	chan->kick(findClient(client), user);
 }
 
-/*	ft_part_receive
-**	@param buffer : the buffer to parse
-**	@param client : the fd of the client
-**	Quit the client from a channel
-*/
 
 void	Server::ft_part_receive(std::string buffer, int client)
 {
@@ -442,11 +392,6 @@ void	Server::ft_part_receive(std::string buffer, int client)
 		return ;
 	if (ft_verif_user(client) == 1)
 		return ;
-	if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
-    {
-        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
-        return ;
-    }
 	if (buffer.find("#", 0) == std::string::npos)
 	{
 		ft_send_error(client, 461, "PART", "ERR_NEEDMOREPARAMS");
@@ -458,58 +403,26 @@ void	Server::ft_part_receive(std::string buffer, int client)
 		channel = buffer.substr(6, buffer.length() - 7);
 	chan = findChannel(channel);
 	chan->quitChannel(findClient(client), buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":", 0) - 2));
-	std::cout << chan->getNBUser() << std::endl;
 	if (chan->getNBUser() == 0)
 		_channel.erase(channel);
 }
 
-/*  ft_privmsg
-**  Sent a private message to a user or a channel
-** @param buffer : the message
-** @param client : the client who sent the message
+/*	ft_send_error
+**	@param fd : the fd of the client
+**	@param error : the error code
+**	@param command : the command
+**	@param type : the type of error
+**	Send an error to the client
 */
 
-void	Server::ft_privmsg(std::string buffer, int client)
+void	Server::ft_send_error(int fd, int error, std::string command, std::string type)
 {
-    Client *user;
-    std::string receiver;
-    std::string message;
-    std::string channel;
+	std::string error_code;
+	std::string error_message;
+	std::string error_send;
 
-    if (ft_verif_user(client) == 1)
-        return ;
-    if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
-    {
-        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
-        return ;
-    }
-    if (buffer.find("#", 0) != std::string::npos)
-    {
-        channel = buffer.substr(9, buffer.find(" ", 0) - 10);
-        if (channel.find_first_of(" ", 0) != std::string::npos)
-            channel.erase(channel.find_first_of(" ", 0), channel.length());
-    }
-    message = std::string(buffer.begin() + buffer.find(":", 0) + 1, buffer.end());
-    receiver = buffer.substr(8, buffer.length() - 9);
-    if (receiver.find_first_of(" ", 0) != std::string::npos)
-		receiver.erase(receiver.find_first_of(" ", 0), receiver .length());
-    user = findClient(client);
-
-    if (channel != "")
-    {
-        if (findChannelByName(channel) == -1)
-            ft_send_error(client ,401, "ERROR", "ERR_NOSUCHCHANNEL");
-        else
-            SendMessageToChannel(channel, user, message);
-    }
-    else
-    {
-        if (findFdByNickname(receiver) == -1)
-        {
-            ft_send_error(client ,401, "ERROR", "ERR_NOSUCHNICK");
-            return ;
-        }
-        else
-            SendMessage(findFdByNickname(receiver), user->getNickname(), message);
-    }
+	error_code = SSTR(error);
+	error_message = " :" + type;
+	error_send = ":" + _servername + " " + error_code + " " + command + error_message + "\r\n";
+	send(fd, error_send.c_str(), error_send.length(), 0);
 }

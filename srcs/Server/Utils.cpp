@@ -1,23 +1,54 @@
 #include "../../inc/Server.hpp"
 
-/*	ft_send_error
-**	@param fd : the fd of the client
-**	@param error : the error code
-**	@param command : the command
-**	@param type : the type of error
-**	Send an error to the client
+/*  ft_privmsg
+**  Sent a private message to a user or a channel
+** @param buffer : the message
+** @param client : the client who sent the message
 */
 
-void	Server::ft_send_error(int fd, int error, std::string command, std::string type)
+void	Server::ft_privmsg(std::string buffer, int client)
 {
-	std::string error_code;
-	std::string error_message;
-	std::string error_send;
+    Client *user;
+    std::string receiver;
+    std::string message;
+    std::string channel;
 
-	error_code = SSTR(error);
-	error_message = " :" + type;
-	error_send = ":" + _servername + " " + error_code + " " + command + error_message + "\r\n";
-	send(fd, error_send.c_str(), error_send.length(), 0);
+    if (ft_verif_user(client) == 1)
+        return ;
+    if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
+    {
+        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
+        return ;
+    }
+    if (buffer.find("#", 0) != std::string::npos)
+    {
+        channel = buffer.substr(9, buffer.find(" ", 0) - 10);
+        if (channel.find_first_of(" ", 0) != std::string::npos)
+            channel.erase(channel.find_first_of(" ", 0), channel.length());
+    }
+    message = std::string(buffer.begin() + buffer.find(":", 0) + 1, buffer.end());
+    receiver = buffer.substr(8, buffer.length() - 9);
+    if (receiver.find_first_of(" ", 0) != std::string::npos)
+		receiver.erase(receiver.find_first_of(" ", 0), receiver .length());
+    user = findClient(client);
+
+    if (channel != "")
+    {
+        if (findChannelByName(channel) == -1)
+            ft_send_error(client ,401, "ERROR", "ERR_NOSUCHCHANNEL");
+        else
+            SendMessageToChannel(channel, user, message);
+    }
+    else
+    {
+        if (findFdByNickname(receiver) == -1)
+        {
+            ft_send_error(client ,401, "ERROR", "ERR_NOSUCHNICK");
+            return ;
+        }
+        else
+            SendMessage(findFdByNickname(receiver), user->getNickname(), message);
+    }
 }
 
 /*  SendMessage
@@ -78,12 +109,6 @@ void Server::ft_welcome(int fd)
     send(fd, welcome.c_str(), welcome.length(), 0);
 }
 
-/*  ft_count_args
-**  Count the number of arguments in a string
-** @param buffer : the string
-** @return the number of arguments
-*/
-
 int		Server::ft_count_args(std::string buffer)
 {
 	int	count(0);
@@ -95,14 +120,6 @@ int		Server::ft_count_args(std::string buffer)
     }	return (count);
 }
 
-/*  ft_verif_empty
-**  Verify if the string is empty
-** @param buffer : the string
-** @param cmd : the command
-** @param client : the file descriptor of the client
-** @return 1 if the string is empty, 0 if not
-*/
-
 int		Server::ft_verif_empty(std::string buffer, std::string cmd, int client)
 {
 	if (buffer.length() - 1 <= cmd.length())
@@ -112,12 +129,6 @@ int		Server::ft_verif_empty(std::string buffer, std::string cmd, int client)
 	}
 	return (0);
 }
-
-/*  ft_verif_user
-**  Verify if the user is registered
-** @param client : the file descriptor of the client
-** @return 1 if the user is not registered, 0 if not
-*/
 
 int Server::ft_verif_user(int client)
 {

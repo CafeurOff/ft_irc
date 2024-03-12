@@ -222,9 +222,12 @@ void Channel::quitChannel(Client* client, std::string mess)
 	}
 	it = _operators.find(client->getNickname());
 	if (it != _operators.end())
+	{
 		_operators.erase(it);
+		_nUser--;
+	}
 	std::string msg = ":" + client->getNickname() + "!~" + client->getUsername() + "@127.0.0.1" + " PART #" + _name + " :" + mess + "\n";
-	sendAll(msg);
+	sendAll(msg);		
 }
 
 void Channel::checkMode(std::string **mess)
