@@ -231,26 +231,17 @@ void Channel::quitChannel(Client* client, std::string mess)
 	sendAll(msg);		
 }
 
-void Channel::checkMode(std::string **mess)
+void Channel::checkMode(std::string *mess)
 {
-	size_t i = 0;
+	std::string *paramString;
 
-	while (mess[i] != NULL)
-	{
-		std::string modeString = *mess[i];
-		std::string paramString;
-		if (modeString.size() < 2)
-			continue;
-		char modeSign = modeString[0];
-		char modeChar = modeString[0];
-		if (modeString.size() > 2)
-			paramString = modeString[1];
-		modifMode(modeSign, modeChar, paramString);
-		i++;
-	}
+	char modeSign = mess[0][0];
+	char modeChar = mess[0][1];
+	paramString = mess + 1;
+	modifMode(modeSign, modeChar, paramString);
 }
 
-void Channel::modifMode(char modeSign, char modeChar, std::string &param)
+void Channel::modifMode(char modeSign, char modeChar, std::string *param)
 {
 	if (modeSign == '+')
 	{
@@ -267,26 +258,30 @@ void Channel::modifMode(char modeSign, char modeChar, std::string &param)
 		else if (modeChar == 'k') //Definir un mot de passe
 		{
 			if (_passwordUse == false)
-				setPassword(param);
+				setPassword(param[0]);
 		}
 		else if (modeChar == 'o') //Donner le privilege d'operateur
         {
-            if (_operators.find(param) != _operators.end())
-                return ;
-            std::map<std::string, Client*>::iterator it = _regulars.find(param);
-            if (it != _regulars.end())
-            {
-                Client* user = it->second;
-                _regulars.erase(it);
-                _operators[param] = user;
-            }
+			for (size_t i = 0; !param[i].size(); i++)
+			{
+				std::cout << param[i] << std::endl;
+				if (_operators.find(param[i]) != _operators.end())
+					return ;
+				std::map<std::string, Client*>::iterator it = _regulars.find(param[i]);
+				if (it != _regulars.end())
+				{
+					Client* user = it->second;
+					_regulars.erase(it);
+					_operators[param[i]] = user;
+				}
+			}
         }
         else if (modeChar == 'l') //Definir une limite d'utilisateur du canal
         {
             if (_limit == false)
             {
                 _limit = true;
-                _limit = std::atoi(param.c_str());
+                //_limitUser = param[0]; atoi
             }
             //sendNumericResponse("346");
             //sendNumericResponse("347");
@@ -314,22 +309,25 @@ void Channel::modifMode(char modeSign, char modeChar, std::string &param)
 		}
 		else if (modeChar == 'o') //Retirer le privilege d'operateur
         {
-            if (_regulars.find(param) != _regulars.end())
-                return ;
-            std::map<std::string, Client*>::iterator it = _operators.find(param);
-            if (it != _operators.end())
-            {
-                Client* user = it->second;
-                _operators.erase(it);
-                _regulars[param] = user;
-            }
+			for (size_t i = 0; !param[i].empty(); i++)
+			{
+				if (_regulars.find(param[i]) != _regulars.end())
+					return ;
+				std::map<std::string, Client*>::iterator it = _operators.find(param[i]);
+				if (it != _operators.end())
+				{
+					Client* user = it->second;
+					_operators.erase(it);
+					_regulars[param[i]] = user;
+				}
+			}
         }
         else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
         {
             if (_limit == true)
             {
                 _limit = false;
-                _limit = 0;
+                _limitUser = 0;
             }
             //sendNumericResponse("346");
             //sendNumericResponse("347");
