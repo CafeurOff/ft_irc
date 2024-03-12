@@ -1,56 +1,5 @@
 #include "../../inc/Server.hpp"
 
-/*  ft_privmsg
-**  Sent a private message to a user or a channel
-** @param buffer : the message
-** @param client : the client who sent the message
-*/
-
-void	Server::ft_privmsg(std::string buffer, int client)
-{
-    Client *user;
-    std::string receiver;
-    std::string message;
-    std::string channel;
-
-    if (ft_verif_user(client) == 1)
-        return ;
-    if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
-    {
-        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
-        return ;
-    }
-    if (buffer.find("#", 0) != std::string::npos)
-    {
-        channel = buffer.substr(9, buffer.find(" ", 0) - 10);
-        if (channel.find_first_of(" ", 0) != std::string::npos)
-            channel.erase(channel.find_first_of(" ", 0), channel.length());
-    }
-    message = std::string(buffer.begin() + buffer.find(":", 0) + 1, buffer.end());
-    receiver = buffer.substr(8, buffer.length() - 9);
-    if (receiver.find_first_of(" ", 0) != std::string::npos)
-		receiver.erase(receiver.find_first_of(" ", 0), receiver .length());
-    user = findClient(client);
-
-    if (channel != "")
-    {
-        if (findChannelByName(channel) == -1)
-            ft_send_error(client ,401, "ERROR", "ERR_NOSUCHCHANNEL");
-        else
-            SendMessageToChannel(channel, user, message);
-    }
-    else
-    {
-        if (findFdByNickname(receiver) == -1)
-        {
-            ft_send_error(client ,401, "ERROR", "ERR_NOSUCHNICK");
-            return ;
-        }
-        else
-            SendMessage(findFdByNickname(receiver), user->getNickname(), message);
-    }
-}
-
 /*  SendMessage
 **  Sent a message to a user
 ** @param fd : the file descriptor of the user
@@ -122,7 +71,7 @@ int		Server::ft_count_args(std::string buffer)
 
 int		Server::ft_verif_empty(std::string buffer, std::string cmd, int client)
 {
-	if (buffer.length() - 1 <= cmd.length())
+	if (buffer.compare(0, cmd.length(), cmd))
 	{
 		ft_send_error(client, 461, cmd, "ERR_NEEDMOREPARAMS");
 		return (1);
