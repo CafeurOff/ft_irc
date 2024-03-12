@@ -57,6 +57,11 @@ const std::string& Channel::getName() const
 	return (_name);
 }
 
+int	Channel::getNBUser(void)
+{
+	return (_nUser);
+}
+
 void Channel::sendNumericResponse(Client* client, const std::string& code, const std::string& param1, const std::string& param2)
 {
 	std::string message = ":127.0.0.1 " + code + " " + param1 + " ";
@@ -218,9 +223,12 @@ void Channel::quitChannel(Client* client, std::string mess)
 	}
 	it = _operators.find(client->getNickname());
 	if (it != _operators.end())
+	{
 		_operators.erase(it);
+		_nUser--;
+	}
 	std::string msg = ":" + client->getNickname() + "!~" + client->getUsername() + "@127.0.0.1" + " PART #" + _name + " :" + mess + "\n";
-	sendAll(msg);
+	sendAll(msg);		
 }
 
 void Channel::checkMode(std::string **mess)
@@ -326,6 +334,28 @@ void Channel::modifMode(char modeSign, char modeChar, std::string &param)
             //sendNumericResponse("346");
             //sendNumericResponse("347");
         }
+		else if (modeChar == 'o') //Retirer le privilege d'operateur
+        {
+            if (_regulars.find(param) != _regulars.end())
+                return ;
+            std::map<std::string, Client*>::iterator it = _operators.find(param);
+            if (it != _operators.end())
+            {
+                Client* user = it->second;
+                _operators.erase(it);
+                _regulars[param] = user;
+            }
+        }
+        else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
+        {
+            if (_limit == true)
+            {
+                _limit = false;
+                _limit = 0;
+            }
+            //sendNumericResponse("346");
+            //sendNumericResponse("347");
+        }
 	}
 }
 
@@ -342,4 +372,15 @@ void Channel::SendAllFD(const std::string& message, int fd)
 		if (it->second->getFd() != fd)
 			sendMessage(it->second, message);
 	}
+}
+
+int Channel::clientInChannel(Client *user)
+{
+	std::map<std::string, Client*>::iterator it = _operators.begin();//find(user->getNickname());
+	if (it != _operators.end())
+		return (2);
+	it = _regulars.find(user->getNickname());
+	if (it != _regulars.end())
+		return (1);
+	return (0);
 }
