@@ -164,7 +164,7 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 		ft_send_error(client, 461, "TOPIC", "ERR_NEEDMOREPARAMS");
 	if (buffer.find(":", 0) != std::string::npos)
 	{
-		channel = buffer.substr(7, buffer.find(" ", 6) - 6);
+		channel = buffer.substr(7, buffer.find(" ", 6) - 7);
 		newTopic = buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":",0));
 	}
 	else
@@ -179,11 +179,27 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 **	Invite a user to a channel
 */
 
-void	Server::ft_invite_receive(std::string buffer, int client)
+void Server::ft_invite_receive(std::string buffer, int client)
 {
-	(void)buffer;
-	(void)client;
+	std::string	channel;
+	std::string	user;
+	Channel	*chan;
+	Client	*newUser;
+
+	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos || buffer.find(" ", 7) == std::string::npos)
+		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
+	channel = buffer.substr(buffer.find("#", 0) + 1, buffer.find("\n", buffer.find("#", 0)) - (buffer.find("#", 0) + 1));
+	user = buffer.substr(7, buffer.find(" ",7) - 7);
+	chan = findChannel(channel);
+	newUser = findClient(findFdByNickname(user));
+	std::cout << channel << std::endl;
+	if (chan && newUser)
+		chan->invite(findClient(client), newUser);
+	else
+		ft_send_error(client, 401, "INVITE", "ERR_NOSUCHNICK");
 }
+
+
 
 /*	ft_mode_receive
 **	@param buffer : the buffer to parse
