@@ -105,7 +105,7 @@ int		Server::ft_count_args(std::string buffer)
 
 int		Server::ft_verif_empty(std::string buffer, std::string cmd, int client)
 {
-	if (buffer.length() - 1 <= cmd.length())
+	if (buffer.compare(0, cmd.length(), cmd))
 	{
 		ft_send_error(client, 461, cmd, "ERR_NEEDMOREPARAMS");
 		return (1);
@@ -127,4 +127,90 @@ int Server::ft_verif_user(int client)
         return (1);
     }
     return (0);
+}
+
+/*  ft_getServerName
+**  Get the server name
+** @return the server name
+*/
+
+std::string		Server::ft_getServerName()
+{
+	char hostname[1024];
+
+	if (gethostname(hostname, sizeof(hostname)) == -1)
+	{
+		std::cerr << "gethostname failed" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	_servername = hostname;
+	return (_servername);
+}
+
+/*	FindFdByNickname
+**	Find the file descriptor by the nickname of the client
+**	@param nickname : the nickname of the client
+**	@return the file descriptor
+*/
+
+int Server::findFdByNickname(const std::string& nickname)
+{
+	std::map<int, Client>::iterator it;
+	for (it = _client.begin(); it != _client.end(); ++it)
+	{
+		if (it->second.getNickname() == nickname)
+			return (it->second.getFd());
+	}
+	return (-1);
+}
+
+/*	FindFd
+**	Find the file descriptor
+**	@param fd : the file descriptor
+**	@return 1 if the file descriptor is found, -1 if not
+*/
+
+int Server::findFd(int fd)
+{
+	std::map<int, Client>::iterator it;
+	for (it = _client.begin(); it != _client.end(); ++it)
+	{
+		if (it->first == fd)
+			return (1);
+	}
+	return (-1);
+}
+
+/*	FindClient
+**	Find the client by the file descriptor
+**	@param fd : the file descriptor
+**	@return the client
+*/
+
+Client *Server::findClient(int fd)
+{
+	std::map<int, Client>::iterator it;
+	for (it = _client.begin(); it != _client.end(); ++it)
+	{
+		if (it->first == fd)
+			return (&it->second);
+	}
+	return (NULL);
+}
+
+/*	FindChannel
+**	Find the channel by the name
+**	@param name : the name of the channel
+**	@return the channel
+*/
+
+Channel *Server::findChannel(std::string name)
+{
+	std::map<std::string, Channel>::iterator it;
+	for (it = _channel.begin(); it != _channel.end(); ++it)
+	{
+		if (it->first == name)
+			return (&it->second);
+	}
+	return (NULL);
 }

@@ -178,17 +178,10 @@ void Channel::invite(Client* sender, Client* newUser) {
     }
 }
 
-
 void Channel::topic(Client* sender, const std::string& newTopic) {
     // Check if the sender is an operator of the channel or the only person in it
     if (_restrictTopic && _operators.find(sender->getNickname()) == _operators.end()) {
         sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
-        return;
-    }
-
-    // Check if the new topic is too long
-    if (newTopic.size() > 80) {
-        sendNumericResponse(sender, "403", sender->getNickname(), _name); // ERR_TOPICTOOLONG
         return;
     }
 
@@ -197,8 +190,6 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
 	{
 		if (_topic == "")
 			sendNumericResponse(sender, "331", sender->getNickname(), _name); // RPL_NOTOPIC
-		else
-			sendNumericResponse(sender, "332", sender->getNickname(), _name); // RPL_TOPIC
 		return;
 	}
 
@@ -209,7 +200,6 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
 
     // Notify the sender about the successful topic change
     sendNumericResponse(sender, "332", sender->getNickname(), _name); // RPL_TOPIC
-    sendNumericResponse(sender, "333", sender->getNickname(), _name); // RPL_TOPICWHOTIME
 }
 
 void Channel::quitChannel(Client* client, std::string mess)
@@ -227,38 +217,17 @@ void Channel::quitChannel(Client* client, std::string mess)
 	sendAll(msg);
 }
 
-void Channel::checkMode(std::string **mess)
-{
-	size_t i = 0;
-
-	while (mess[i] != NULL)
-	{
-		std::string modeString = *mess[i];
-		std::string paramString;
-		if (modeString.size() < 2)
-			continue;
-		char modeSign = modeString[0];
-		char modeChar = modeString[0];
-		if (modeString.size() > 2)
-			paramString = modeString[1];
-		modifMode(modeSign, modeChar, paramString);
-		i++;
-	}
-}
-
 void Channel::checkMode(std::string *mess)
 {
-	std::string paramString;
+	std::string *paramString;
 
-	std::cout << "Coucou" << std::endl;
 	char modeSign = mess[0][0];
 	char modeChar = mess[0][1];
-	if (mess[0].size() > 2)
-		paramString = mess[1];
+	paramString = mess + 1;
 	modifMode(modeSign, modeChar, paramString);
 }
 
-void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
+void Channel::modifMode(char modeSign, char modeChar, std::string *param)
 {
 	if (modeSign == '+')
 	{
@@ -274,27 +243,32 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
 		}
 		else if (modeChar == 'k') //Definir un mot de passe
 		{
+			// if is empty
 			if (_passwordUse == false)
-				setPassword(param);
+				setPassword(param[0]);
 		}
 		else if (modeChar == 'o') //Donner le privilege d'operateur
         {
-            if (_operators.find(param) != _operators.end())
-                return ;
-            std::map<std::string, Client*>::iterator it = _regulars.find(param);
-            if (it != _regulars.end())
-            {
-                Client* user = it->second;
-                _regulars.erase(it);
-                _operators[param] = user;
-            }
+			for (size_t i = 0; !param[i].size(); i++)
+			{
+				std::cout << param[i] << std::endl;
+				if (_operators.find(param[i]) != _operators.end())
+					return ;
+				std::map<std::string, Client*>::iterator it = _regulars.find(param[i]);
+				if (it != _regulars.end())
+				{
+					Client* user = it->second;
+					_regulars.erase(it);
+					_operators[param[i]] = user;
+				}
+			}
         }
         else if (modeChar == 'l') //Definir une limite d'utilisateur du canal
         {
             if (_limit == false)
             {
                 _limit = true;
-                //_limitUser = param; atoi
+                //_limitUser = param[0]; atoi
             }
             //sendNumericResponse("346");
             //sendNumericResponse("347");
@@ -322,15 +296,18 @@ void Channel::modifMode(char modeSign, char modeChar, const std::string &param)
 		}
 		else if (modeChar == 'o') //Retirer le privilege d'operateur
         {
-            if (_regulars.find(param) != _regulars.end())
-                return ;
-            std::map<std::string, Client*>::iterator it = _operators.find(param);
-            if (it != _operators.end())
-            {
-                Client* user = it->second;
-                _operators.erase(it);
-                _regulars[param] = user;
-            }
+			for (size_t i = 0; !param[i].empty(); i++)
+			{
+				if (_regulars.find(param[i]) != _regulars.end())
+					return ;
+				std::map<std::string, Client*>::iterator it = _operators.find(param[i]);
+				if (it != _operators.end())
+				{
+					Client* user = it->second;
+					_operators.erase(it);
+					_regulars[param[i]] = user;
+				}
+			}
         }
         else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
         {

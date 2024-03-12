@@ -74,7 +74,7 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 		return ;
 	}
 	nick = buffer.substr(5, buffer.length() - 6);
-	if (buffer.length() <= 7)
+	if (buffer.length() <= 6)
 	{
 		ft_send_error(client, 431, "NICK", "ERR_NONICKNAMEGIVEN");
 		return ;
@@ -94,7 +94,6 @@ void	Server::ft_nick_receive(std::string buffer, int client)
 		user = findClient(client);
 		user->setNickname(nick);
 	}
-	ft_welcome(client);
 }
 
 /*	ft_user_receive
@@ -118,8 +117,11 @@ void	Server::ft_user_receive(std::string buffer, int client)
 	if(findFd(client))
 	{
 		user = findClient(client);
+		if (!user->getUsername().empty())
+			return ;
 		user->setUsername(username);
 	}
+	ft_welcome(client);
 }
 
 /*	ft_quit_user
@@ -187,8 +189,10 @@ void	Server::ft_join_receive(std::string buffer, int client)
 	{
 		if (buffer.find(" ", 5) != std::string::npos)
 		{
-			channel = buffer.substr(6, buffer.find(" ", 5) - 6);
-			password = buffer.substr(buffer.find(" ", 5), buffer.length() - buffer.find(" ", 5));
+			buffer.erase(0, buffer.find("#", 0) + 1);
+			channel = buffer.substr(0, buffer.find(" ", 0));
+			buffer.erase(0, buffer.find(" ", 0) + 1);
+			password = buffer.substr(0, buffer.length() - 1);
 			chan = findChannel(channel);
 			if (!chan)
 				_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, password, findClient(client))));
@@ -235,8 +239,11 @@ void	Server::ft_topic_receive(std::string buffer, int client)
 	}
 	if (buffer.find(":", 0) != std::string::npos)
 	{
-		channel = buffer.substr(7, buffer.find(" ", 6) - 7);
-		newTopic = buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":",0));
+		buffer.erase(0, buffer.find("#", 0));
+		channel = buffer.substr(1, buffer.find(" ", 0) - 1);
+		buffer.erase(0, buffer.find(":", 0) + 1);
+		buffer.erase(buffer.end() - 1);
+		newTopic = buffer;
 	}
 	else
 		channel = buffer.substr(7, buffer.length() - 8);
@@ -266,20 +273,10 @@ void Server::ft_invite_receive(std::string buffer, int client)
 		return ;
 	if (ft_verif_user(client) == 1)
 		return ;
-	if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
-    {
-        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
-        return ;
-    }
 	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos || buffer.find(" ", 7) == std::string::npos)
 	{
 		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
 		return ;
-
-	if (buffer.find(" ", 0) == std::string::npos || buffer.find("#", 0) == std::string::npos || buffer.find(" ", 7) == std::string::npos)
-	{
-		ft_send_error(client, 461, "INVITE", "ERR_NEEDMOREPARAMS");
-		return ;	
 	}
 	channel = buffer.substr(buffer.find("#", 0) + 1, buffer.find("\n", buffer.find("#", 0)) - (buffer.find("#", 0) + 1));
 	user = buffer.substr(7, buffer.find(" ",7) - 7);
@@ -300,34 +297,17 @@ void Server::ft_invite_receive(std::string buffer, int client)
 **	Change the mode of the client
 */
 
-void	Server::ft_mode_receive(std::string buffer, int client)
+void Server::ft_mode_receive(std::string buffer, int client)
 {
 	std::string 	mode;
 	size_t			args;
 	std::string		channel;
 	Channel			*chan;
 
-
-	(void)mode;
-	(void)args;
-	(void)channel;
-	(void)chan;
-	(void)client;
-	(void)buffer;
-
-
-	/*
 	if (ft_verif_empty(buffer, "MODE ", client))
 		return ;
 	if (ft_verif_user(client) == 1)
 		return ;
-
-	if (findClient(client)->getNickname() == "" || findClient(client)->getUsername() == "")
-    {
-        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
-        return ;
-    }
-
 	buffer.erase(0, buffer.find_first_of(" ", 0) + 1);
 	if (buffer.empty() || buffer.find("#", 0) == std::string::npos)
 	{
@@ -337,7 +317,6 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 	if (buffer.find_first_of(" ", 0) == std::string::npos)
 		return ;
 	channel = buffer.substr(1,buffer.find_first_of(" ", 0) - 1);
-	std::cout << "Chan is :" << channel << std::endl;
 	chan = findChannel(channel);
 	if (chan == NULL)
 	{
@@ -350,36 +329,25 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 		return ;
 	}
 	buffer.erase(0, buffer.find_first_of(" ", 0) + 1);
-	std::cout << "MODE is :" << buffer << std::endl;
-	/*
 	if (chan->clientInChannel(findClient(client)) != 2 && buffer != "+b")
 	{
 		ft_send_error(client, 482, "MODE", "ERR_CHANOPRIVSNEEDED");
 		return ;
 	}
-	Dans le cas ou le client n'a pas les droits admin,
-	MAIS en faisant une cmd JOIN, konversation envoie une cmd MODE avec +b,
-	donc ne pas renvoyez d'erreur à ce moment là
-	/*
 	args = ft_count_args(buffer);
-	std::cout << "len:" << args << std::endl;
+	buffer.erase(buffer.end() - 1);
 	if (args == 0)
-	{
-		std::cout << "mode len:" << buffer.length() << std::endl;
 		chan->checkMode(&buffer);
-	}
 	else
 	{
 		std::string *param = new std::string[args + 1];
 		for (size_t i = 0; i <= args; i++)
 		{
 			param[i] = buffer.substr(0, buffer.find(" ", 0));
-			buffer.erase(0, buffer.find(" ", 0));
-			std::cout << "mode :" << param[i] << std::endl;
+			buffer.erase(0, buffer.find(" ", 0) + 1);
 		}
 		chan->checkMode(param);
 	}
-	*/
 }
 
 /*	ft_kick_receive
@@ -457,8 +425,12 @@ void	Server::ft_part_receive(std::string buffer, int client)
 	else
 		channel = buffer.substr(6, buffer.length() - 7);
 	chan = findChannel(channel);
+	if (chan == NULL)
+	{
+		ft_send_error(client, 403, "PART", "ERR_NOSUCHCHANNEL");
+		return ;
+	}
 	chan->quitChannel(findClient(client), buffer.substr(buffer.find(":", 0) + 1, buffer.length() - buffer.find(":", 0) - 2));
-	std::cout << chan->getNBUser() << std::endl;
 	if (chan->getNBUser() == 0)
 		_channel.erase(channel);
 }
