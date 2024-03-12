@@ -1,47 +1,23 @@
 #include "../../inc/Server.hpp"
 
-/*  ft_privmsg
-**  Sent a private message to a user or a channel
-** @param buffer : the message
-** @param client : the client who sent the message
+/*	ft_send_error
+**	@param fd : the fd of the client
+**	@param error : the error code
+**	@param command : the command
+**	@param type : the type of error
+**	Send an error to the client
 */
 
-void	Server::ft_privmsg(std::string buffer, int client)
+void	Server::ft_send_error(int fd, int error, std::string command, std::string type)
 {
-    Client *user;
-    std::string receiver;
-    std::string message;
-    std::string channel;
+	std::string error_code;
+	std::string error_message;
+	std::string error_send;
 
-    if (buffer.find("#", 0) != std::string::npos)
-    {
-        channel = buffer.substr(9, buffer.find(" ", 0) - 10);
-        if (channel.find_first_of(" ", 0) != std::string::npos)
-            channel.erase(channel.find_first_of(" ", 0), channel.length());
-    }
-    message = std::string(buffer.begin() + buffer.find(":", 0) + 1, buffer.end());
-    receiver = buffer.substr(8, buffer.length() - 9);
-    if (receiver.find_first_of(" ", 0) != std::string::npos)
-		receiver.erase(receiver.find_first_of(" ", 0), receiver .length());
-    user = findClient(client);
-
-    if (channel != "")
-    {
-        if (findChannelByName(channel) == -1)
-            ft_send_error(client ,401, "ERROR", "ERR_NOSUCHCHANNEL");
-        else
-            SendMessageToChannel(channel, user, message);
-    }
-    else
-    {
-        if (findFdByNickname(receiver) == -1)
-        {
-            ft_send_error(client ,401, "ERROR", "ERR_NOSUCHNICK");
-            return ;
-        }
-        else
-            SendMessage(findFdByNickname(receiver), user->getNickname(), message);
-    }
+	error_code = SSTR(error);
+	error_message = " :" + type;
+	error_send = ":" + _servername + " " + error_code + " " + command + error_message + "\r\n";
+	send(fd, error_send.c_str(), error_send.length(), 0);
 }
 
 /*  SendMessage
@@ -102,8 +78,139 @@ void Server::ft_welcome(int fd)
     send(fd, welcome.c_str(), welcome.length(), 0);
 }
 
-/*  ft_FindClientChannel
-**  Return all channel connected for a Client
-** @param fd : the file descriptor of the client
+/*  ft_count_args
+**  Count the number of arguments in a string
+** @param buffer : the string
+** @return the number of arguments
 */
 
+int		Server::ft_count_args(std::string buffer)
+{
+	int	count(0);
+
+	for (size_t i = 0; i < buffer.length(); ++i) {
+			if (buffer[i] == ' ') {
+				count++;
+			}
+    }	return (count);
+}
+
+/*  ft_verif_empty
+**  Verify if the string is empty
+** @param buffer : the string
+** @param cmd : the command
+** @param client : the file descriptor of the client
+** @return 1 if the string is empty, 0 if not
+*/
+
+int		Server::ft_verif_empty(std::string buffer, std::string cmd, int client)
+{
+	if (buffer.compare(0, cmd.length(), cmd))
+	{
+		ft_send_error(client, 461, cmd, "ERR_NEEDMOREPARAMS");
+		return (1);
+	}
+	return (0);
+}
+
+/*  ft_verif_user
+**  Verify if the user is registered
+** @param client : the file descriptor of the client
+** @return 1 if the user is not registered, 0 if not
+*/
+
+int Server::ft_verif_user(int client)
+{
+    if (findFd(client) == -1)
+    {
+        ft_send_error(client, 451, "ERROR", "ERR_NOTREGISTERED");
+        return (1);
+    }
+    return (0);
+}
+
+/*  ft_getServerName
+**  Get the server name
+** @return the server name
+*/
+
+std::string		Server::ft_getServerName()
+{
+	char hostname[1024];
+
+	if (gethostname(hostname, sizeof(hostname)) == -1)
+	{
+		std::cerr << "gethostname failed" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	_servername = hostname;
+	return (_servername);
+}
+
+/*	FindFdByNickname
+**	Find the file descriptor by the nickname of the client
+**	@param nickname : the nickname of the client
+**	@return the file descriptor
+*/
+
+int Server::findFdByNickname(const std::string& nickname)
+{
+	std::map<int, Client>::iterator it;
+	for (it = _client.begin(); it != _client.end(); ++it)
+	{
+		if (it->second.getNickname() == nickname)
+			return (it->second.getFd());
+	}
+	return (-1);
+}
+
+/*	FindFd
+**	Find the file descriptor
+**	@param fd : the file descriptor
+**	@return 1 if the file descriptor is found, -1 if not
+*/
+
+int Server::findFd(int fd)
+{
+	std::map<int, Client>::iterator it;
+	for (it = _client.begin(); it != _client.end(); ++it)
+	{
+		if (it->first == fd)
+			return (1);
+	}
+	return (-1);
+}
+
+/*	FindClient
+**	Find the client by the file descriptor
+**	@param fd : the file descriptor
+**	@return the client
+*/
+
+Client *Server::findClient(int fd)
+{
+	std::map<int, Client>::iterator it;
+	for (it = _client.begin(); it != _client.end(); ++it)
+	{
+		if (it->first == fd)
+			return (&it->second);
+	}
+	return (NULL);
+}
+
+/*	FindChannel
+**	Find the channel by the name
+**	@param name : the name of the channel
+**	@return the channel
+*/
+
+Channel *Server::findChannel(std::string name)
+{
+	std::map<std::string, Channel>::iterator it;
+	for (it = _channel.begin(); it != _channel.end(); ++it)
+	{
+		if (it->first == name)
+			return (&it->second);
+	}
+	return (NULL);
+}
