@@ -174,9 +174,10 @@ void Channel::invite(Client* sender, Client* newUser) {
     if (newUser != NULL) {
 		std::string inviteMessage = ":" + sender->getNickname() + "!~" + sender->getUsername() + "@127.0.0.1" + " INVITE " + newUser->getNickname() + " :" + _name + "\n";
 		sendMessage(newUser, inviteMessage);
+    } else {
+        sendNumericResponse(sender, "401", sender->getNickname(), ""); // ERR_NOSUCHNICK
     }
 }
-
 
 void Channel::topic(Client* sender, const std::string& newTopic) {
     // Check if the sender is an operator of the channel or the only person in it
@@ -189,7 +190,7 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
 	if (newTopic.empty())
 	{
 		if (_topic == "")
-			sendNumericResponse(sender, "331", sender->getNickname(), _name); // RPL_NOTOPIC  
+			sendNumericResponse(sender, "331", sender->getNickname(), _name); // RPL_NOTOPIC
 		return;
 	}
 
@@ -212,12 +213,9 @@ void Channel::quitChannel(Client* client, std::string mess)
 	}
 	it = _operators.find(client->getNickname());
 	if (it != _operators.end())
-	{
 		_operators.erase(it);
-		_nUser--;
-	}
 	std::string msg = ":" + client->getNickname() + "!~" + client->getUsername() + "@127.0.0.1" + " PART #" + _name + " :" + mess + "\n";
-	sendAll(msg);		
+	sendAll(msg);
 }
 
 void Channel::checkMode(std::string *mess)
@@ -246,6 +244,7 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
 		}
 		else if (modeChar == 'k') //Definir un mot de passe
 		{
+			// if is empty
 			if (_passwordUse == false)
 				setPassword(param[0]);
 		}

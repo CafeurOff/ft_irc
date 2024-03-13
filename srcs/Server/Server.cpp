@@ -1,6 +1,8 @@
 #include "../../inc/Server.hpp"
 
+// Bool to check if the server is up
 bool ServerUp = true;
+
 /*	Constructor
 **	@param av : the arguments of the server
 **	Set all commands for my map
@@ -143,79 +145,4 @@ void	Server::Init()
 		std::cerr << "listen failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-}
-
-std::string		Server::ft_getServerName()
-{
-	char hostname[1024];
-
-	if (gethostname(hostname, sizeof(hostname)) == -1)
-	{
-		std::cerr << "gethostname failed" << std::endl;
-		exit(EXIT_FAILURE);
-	}
-	_servername = hostname;
-	return (_servername);
-}
-
-/*	FindFdByNickname
-**	Find the file descriptor by the nickname of the client
-**	@param nickname : the nickname of the client
-**	@return the file descriptor
-*/
-
-int Server::findFdByNickname(const std::string& nickname)
-{
-	std::map<int, Client>::iterator it;
-	for (it = _client.begin(); it != _client.end(); ++it)
-	{
-		if (it->second.getNickname() == nickname)
-			return (it->second.getFd());
-	}
-	return (-1);
-}
-
-/*	FindFd
-**	Find the file descriptor
-**	@param fd : the file descriptor
-**	@return 1 if the file descriptor is found, -1 if not
-*/
-
-int Server::findFd(int fd)
-{
-	std::map<int, Client>::iterator it;
-	for (it = _client.begin(); it != _client.end(); ++it)
-	{
-		if (it->first == fd)
-			return (1);
-	}
-	return (-1);
-}
-
-/*	FindClient
-**	Find the client by the file descriptor
-**	@param fd : the file descriptor
-**	@return the client
-*/
-
-Client *Server::findClient(int fd)
-{
-	std::map<int, Client>::iterator it;
-	for (it = _client.begin(); it != _client.end(); ++it)
-	{
-		if (it->first == fd)
-			return (&it->second);
-	}
-	return (NULL);
-}
-
-Channel *Server::findChannel(std::string name)
-{
-	std::map<std::string, Channel>::iterator it;
-	for (it = _channel.begin(); it != _channel.end(); ++it)
-	{
-		if (it->first == name)
-			return (&it->second);
-	}
-	return (NULL);
 }
