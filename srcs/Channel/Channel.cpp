@@ -156,7 +156,6 @@ void Channel::removeUser(Client* user)
 void Channel::invite(Client* sender, Client* newUser) {
     // Check if the sender is an operator of the channel
     if (_operators.find(sender->getNickname()) == _operators.end()) {
-        // If inviteonly mode is active, return an error
         if (_inviteOnly) {
             sendNumericResponse(sender, "482", sender->getNickname(), _name); // ERR_CHANOPRIVSNEEDED
             return;
@@ -231,23 +230,22 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
 {
 	if (modeSign == '+')
 	{
-		if (modeChar == 'i') //Change Invite Only sur true
+		if (modeChar == 'i')
 		{
 			if (_inviteOnly == false)
 				_inviteOnly = true;
 		}
-		else if (modeChar == 't') //Definir les restrictions de la commande TOPIC pour les operateurs
+		else if (modeChar == 't')
 		{
 			if (_restrictTopic == false)
 				_restrictTopic = true;
 		}
-		else if (modeChar == 'k') //Definir un mot de passe
+		else if (modeChar == 'k')
 		{
-			// if is empty
 			if (_passwordUse == false)
 				setPassword(param[0]);
 		}
-		else if (modeChar == 'o') //Donner le privilege d'operateur
+		else if (modeChar == 'o')
         {
 			size_t i = 0;
 			while (!param[i].empty())
@@ -263,26 +261,26 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
     			++i;
 			}
         }
-        else if (modeChar == 'l') //Definir une limite d'utilisateur du canal
+        else if (modeChar == 'l')
         {
 			_limitUser = true;
-			_limit = std::atoi(param[0].c_str()); //atoi
+			_limit = std::atoi(param[0].c_str());
 			std::cout << _limit << std::endl;
         }
 	}
 	else if (modeSign == '-')
 	{
-		if (modeChar == 'i') //Change invite only on false
+		if (modeChar == 'i')
 		{
 			if (_inviteOnly == true)
 				_inviteOnly = false;
 		}
-		else if (modeChar == 't') //Supprimer les restrictions de la commande TOPIC pour les operateurs
+		else if (modeChar == 't')
 		{
 			if (_restrictTopic == true)
 				_restrictTopic = false;
 		}
-		else if (modeChar == 'k') //Supprimer le mot de passe
+		else if (modeChar == 'k')
 		{
 			if (_passwordUse == true)
 			{
@@ -290,7 +288,7 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
 				_password = "";
 			}
 		}
-		else if (modeChar == 'o') //Retirer le privilege d'operateur
+		else if (modeChar == 'o')
         {
 			size_t i = 0;
 			while (!param[i].empty())
@@ -306,7 +304,7 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
 				i++;
 			}
         }
-        else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
+        else if (modeChar == 'l')
         {
             if (_limitUser == true)
             {
@@ -334,7 +332,7 @@ void Channel::SendAllFD(const std::string& message, int fd)
 
 int Channel::clientInChannel(Client *user)
 {
-	std::map<std::string, Client*>::iterator it = _operators.find(user->getNickname());//find(user->getNickname());
+	std::map<std::string, Client*>::iterator it = _operators.find(user->getNickname());
 	if (it != _operators.end())
 		return (2);
 	it = _regulars.find(user->getNickname());
