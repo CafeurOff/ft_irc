@@ -181,10 +181,11 @@ void	Server::ft_join_receive(std::string buffer, int client)
 	{
 		if (buffer.find(" ", 5) != std::string::npos)
 		{
-			channel = buffer.substr(6, buffer.find(" ", 5) - 6);
-			password = buffer.substr(buffer.find(" ", 5), buffer.length() - buffer.find(" ", 5) - 1);
+			buffer.erase(0, buffer.find("#", 0) + 1);
+			channel = buffer.substr(0, buffer.find(" ", 0));
+			buffer.erase(0, buffer.find(" ", 0) + 1);
+			password = buffer.substr(0, buffer.length() - 1);
 			chan = findChannel(channel);
-			std::cout << password << std::endl;
 			if (!chan)
 				_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, password, findClient(client))));
 			else
@@ -335,12 +336,13 @@ void	Server::ft_mode_receive(std::string buffer, int client)
 		chan->checkMode(&buffer);
 	else
 	{
-		std::string *param = new std::string[args + 1];
+		std::string *param = new std::string[args + 2];
 		for (size_t i = 0; i <= args; i++)
 		{
 			param[i] = buffer.substr(0, buffer.find(" ", 0));
 			buffer.erase(0, buffer.find(" ", 0) + 1);
 		}
+		param[args + 1] = "";
 		chan->checkMode(param);
 	}
 }

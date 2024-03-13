@@ -251,18 +251,22 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
 		}
 		else if (modeChar == 'o') //Donner le privilege d'operateur
         {
-			for (size_t i = 0; !param[i].size(); i++)
+			size_t i = 0;
+			while (!param[i].empty())
 			{
 				std::cout << param[i] << std::endl;
-				if (_operators.find(param[i]) != _operators.end())
-					return ;
-				std::map<std::string, Client*>::iterator it = _regulars.find(param[i]);
-				if (it != _regulars.end())
+    			if (_operators.find(param[i]) != _operators.end())
 				{
-					Client* user = it->second;
-					_regulars.erase(it);
-					_operators[param[i]] = user;
+        			return ;
 				}
+    			std::map<std::string, Client*>::iterator it = _regulars.find(param[i]);
+				if (it != _regulars.end())
+    			{
+        			Client* user = it->second;
+        			//_regulars.erase(it);
+        			_operators[param[i]] = user;
+    			}
+    			++i;
 			}
         }
         else if (modeChar == 'l') //Definir une limite d'utilisateur du canal
@@ -270,7 +274,7 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
             if (_limit == false)
             {
                 _limit = true;
-                //_limitUser = param[0]; atoi
+                _limitUser = std::atoi(param[0].c_str()); //atoi
             }
             //sendNumericResponse("346");
             //sendNumericResponse("347");
@@ -298,17 +302,17 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
 		}
 		else if (modeChar == 'o') //Retirer le privilege d'operateur
         {
-			for (size_t i = 0; !param[i].empty(); i++)
+			size_t i = 0;
+			while (!param[i].empty())
 			{
 				if (_regulars.find(param[i]) != _regulars.end())
 					return ;
 				std::map<std::string, Client*>::iterator it = _operators.find(param[i]);
 				if (it != _operators.end())
 				{
-					Client* user = it->second;
 					_operators.erase(it);
-					_regulars[param[i]] = user;
 				}
+				i++;
 			}
         }
         else if (modeChar == 'l') //Supprimer la limite d'utilisateur du canal
