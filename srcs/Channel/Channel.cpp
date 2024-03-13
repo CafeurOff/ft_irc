@@ -189,12 +189,7 @@ void Channel::topic(Client* sender, const std::string& newTopic) {
 	if (newTopic.empty())
 	{
 		if (_topic == "")
-			sendNumericResponse(sender, "331", sender->getNickname(), _name); // RPL_NOTOPIC
-		else
-		{
-			sendNumericResponse(sender, "332", _name, " :" + _topic); // RPL_TOPIC
-			std::cout << "test : " << _topic << std::endl;
-		}
+			sendNumericResponse(sender, "331", sender->getNickname(), _name); // RPL_NOTOPIC  
 		return;
 	}
 

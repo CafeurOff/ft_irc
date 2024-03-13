@@ -182,8 +182,9 @@ void	Server::ft_join_receive(std::string buffer, int client)
 		if (buffer.find(" ", 5) != std::string::npos)
 		{
 			channel = buffer.substr(6, buffer.find(" ", 5) - 6);
-			password = buffer.substr(buffer.find(" ", 5), buffer.length() - buffer.find(" ", 5));
+			password = buffer.substr(buffer.find(" ", 5), buffer.length() - buffer.find(" ", 5) - 1);
 			chan = findChannel(channel);
+			std::cout << password << std::endl;
 			if (!chan)
 				_channel.insert(std::pair<std::string, Channel>(channel , Channel(channel, password, findClient(client))));
 			else
