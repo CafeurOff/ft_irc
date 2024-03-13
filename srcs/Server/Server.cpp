@@ -18,11 +18,11 @@ Server::Server(char **av)
 	commandFunctions["PASS"] = &Server::ft_verif_pass;
 	commandFunctions["NICK"] = &Server::ft_nick_receive;
 	commandFunctions["USER"] = &Server::ft_user_receive;
-    commandFunctions["QUIT"] = &Server::ft_quit_user;
-    commandFunctions["JOIN"] = &Server::ft_join_receive;
-    commandFunctions["MODE"] = &Server::ft_mode_receive;
-    commandFunctions["TOPIC"] = &Server::ft_topic_receive;
-    commandFunctions["INVITE"] = &Server::ft_invite_receive;
+	commandFunctions["QUIT"] = &Server::ft_quit_user;
+	commandFunctions["JOIN"] = &Server::ft_join_receive;
+	commandFunctions["MODE"] = &Server::ft_mode_receive;
+	commandFunctions["TOPIC"] = &Server::ft_topic_receive;
+	commandFunctions["INVITE"] = &Server::ft_invite_receive;
 	commandFunctions["PRIVMSG"] = &Server::ft_privmsg;
 	commandFunctions["KICK"] = &Server::ft_kick_receive;
   	commandFunctions["PART"] = &Server::ft_part_receive;
