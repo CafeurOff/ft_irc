@@ -28,7 +28,7 @@
 */
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::dec << x ) ).str()
+	( std::ostringstream() << std::dec << x ) ).str()
 
 /*	IRC
 **	@param ac : the number of arguments

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <map>
 #include "Client.hpp"
-
+#include "irc.hpp"
 
 class Client;
 
