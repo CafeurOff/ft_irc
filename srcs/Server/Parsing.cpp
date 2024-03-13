@@ -340,12 +340,13 @@ void Server::ft_mode_receive(std::string buffer, int client)
 		chan->checkMode(&buffer);
 	else
 	{
-		std::string *param = new std::string[args + 1];
+		std::string *param = new std::string[args + 2];
 		for (size_t i = 0; i <= args; i++)
 		{
 			param[i] = buffer.substr(0, buffer.find(" ", 0));
 			buffer.erase(0, buffer.find(" ", 0) + 1);
 		}
+		param[args + 1] = "";
 		chan->checkMode(param);
 	}
 }
@@ -444,6 +445,7 @@ void	Server::ft_part_receive(std::string buffer, int client)
 void	Server::ft_privmsg(std::string buffer, int client)
 {
     Client *user;
+    Channel *chan;
     std::string receiver;
     std::string message;
     std::string channel;
@@ -461,16 +463,30 @@ void	Server::ft_privmsg(std::string buffer, int client)
         if (channel.find_first_of(" ", 0) != std::string::npos)
             channel.erase(channel.find_first_of(" ", 0), channel.length());
     }
-    message = std::string(buffer.begin() + buffer.find(":", 0) + 1, buffer.end());
+	if (buffer.find(":", 0) != std::string::npos)
+    	message = std::string(buffer.begin() + buffer.find(":", 0) + 1, buffer.end());
+	else
+	{
+		ft_send_error(client, 461, "PASS", "ERR_NEEDMOREPARAMS");
+		return ; 
+	}
     receiver = buffer.substr(8, buffer.length() - 9);
     if (receiver.find_first_of(" ", 0) != std::string::npos)
 		receiver.erase(receiver.find_first_of(" ", 0), receiver .length());
     user = findClient(client);
-
     if (channel != "")
     {
         if (findChannelByName(channel) == -1)
+		{
             ft_send_error(client ,401, "ERROR", "ERR_NOSUCHCHANNEL");
+			return ;
+		}
+		chan = findChannel(channel);
+		if (chan->clientInChannel(user) == 0)
+		{
+            ft_send_error(client ,404, "ERROR", "ERR_CANNOTSENDTOCHAN");
+			return ;
+		}
         else
             SendMessageToChannel(channel, user, message);
     }
