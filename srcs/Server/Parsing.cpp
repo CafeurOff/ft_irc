@@ -348,6 +348,7 @@ void Server::ft_mode_receive(std::string buffer, int client)
 		}
 		param[args + 1] = "";
 		chan->checkMode(param);
+		delete [] param;
 	}
 }
 
