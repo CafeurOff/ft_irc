@@ -17,7 +17,11 @@ Bienvenue dans le projet ft_irc ! Ce projet consiste à implémenter un serveur 
 
 ## Utilisation
 1. Lancez le serveur : `./ircserv [port] [mot de passe]`
-2. Utiliser un client (Konversation ou autre) afin de vous connecter au serveur. 
+2. Utiliser un client (Konversation) afin de vous connecter au serveur. 
+
+## DISCLAMER
+Tout le projet a été développé en utilisant le client "Konversation" ! Il est donc indispensable si vous voulez tester le projet ! 
+- [KONVERSATION](https://konversation.kde.org)
 
 ## Contributeurs
 - [lduthill](https://github.com/CafeurOff)
