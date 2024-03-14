@@ -337,7 +337,9 @@ void Server::ft_mode_receive(std::string buffer, int client)
 	args = ft_count_args(buffer);
 	buffer.erase(buffer.end() - 1);
 	if (args == 0)
+	{
 		chan->checkMode(&buffer);
+	}
 	else
 	{
 		std::string *param = new std::string[args + 2];

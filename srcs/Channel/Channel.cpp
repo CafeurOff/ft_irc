@@ -229,7 +229,10 @@ void Channel::checkMode(std::string *mess)
 
 	char modeSign = mess[0][0];
 	char modeChar = mess[0][1];
-	paramString = mess + 1;
+	if (mess[1][0])
+		paramString = mess + 1;
+	else
+		paramString = 0;
 	modifMode(modeSign, modeChar, paramString);
 }
 
@@ -250,7 +253,10 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
 		else if (modeChar == 'k')
 		{
 			if (_passwordUse == false)
-				setPassword(param[0]);
+			{
+				if (param)
+					setPassword(*param);
+			}
 		}
 		else if (modeChar == 'o')
         {
@@ -270,9 +276,12 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
         }
         else if (modeChar == 'l')
         {
-			_limitUser = true;
-			_limit = std::atoi(param[0].c_str());
-        }
+			if (param)
+			{
+				_limitUser = true;
+				_limit = std::atoi(param[0].c_str());
+			}
+		}
 	}
 	else if (modeSign == '-')
 	{
