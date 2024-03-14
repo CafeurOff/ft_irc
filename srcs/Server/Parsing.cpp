@@ -469,7 +469,7 @@ void	Server::ft_privmsg(std::string buffer, int client)
 	else
 	{
 		ft_send_error(client, 461, "PASS", "ERR_NEEDMOREPARAMS");
-		return ; 
+		return ;
 	}
     receiver = buffer.substr(8, buffer.length() - 9);
     if (receiver.find_first_of(" ", 0) != std::string::npos)

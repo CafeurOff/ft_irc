@@ -75,7 +75,21 @@ int Server::findChannelByName(const std::string& name)
 void Server::ft_welcome(int fd)
 {
     std::string welcome = findClient(fd)->getNickname() + " :Welcome to the " + ft_getServerName() + " Network, " + findClient(fd)->getNickname() + "!" + findClient(fd)->getUsername() + "@" + ft_getServerName() + "\n";
-    send(fd, welcome.c_str(), welcome.length(), 0);
+	std::string motd =  findClient(fd)->getNickname() + " :Here you have all the commands you can use\n";
+	std::string motd2 = " :/PASS <password>\
+	\n :/NICK <nickname>\
+	\n :/USER <username> <hostname> <servername> <realname>\
+	\n :/JOIN <#channel> '<pass>'\
+	\n :/MODE <#channel> <mode> [OPERATOR]\
+	\n :/TOPIC <#channel> <topic> [OPERATOR]\
+	\n :/INVITE <nickname> <#channel>\
+	\n :/KICK <#channel> <nickname> [OPERATOR]\
+	\n :/PRIVMSG <nickname> <message>\
+	\n :/PART <#channel>\
+	\n :/QUIT <message>\n";
+	send(fd, welcome.c_str(), welcome.length(), 0);
+	send(fd, motd.c_str(), motd.length(), 0);
+	send(fd, motd2.c_str(), motd2.length(), 0);
 }
 
 /*  ft_count_args
