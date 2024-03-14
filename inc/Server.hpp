@@ -1,7 +1,7 @@
 #pragma once
 
 #define MAX_CLIENT 20
-#define DEBUG true
+#define DEBUG false
 
 #include "irc.hpp"
 #include <string>
