@@ -175,6 +175,13 @@ void Channel::invite(Client* sender, Client* newUser) {
     } else {
         sendNumericResponse(sender, "401", sender->getNickname(), ""); // ERR_NOSUCHNICK
     }
+
+	// if channel has a password, allow the user to join the channel
+	if (_passwordUse) {
+		_regulars.insert(std::pair<std::string, Client*>(newUser->getNickname(), newUser));
+		_nUser++;
+		sendAllUser(newUser);
+	}
 }
 
 void Channel::topic(Client* sender, const std::string& newTopic) {
@@ -265,7 +272,6 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
         {
 			_limitUser = true;
 			_limit = std::atoi(param[0].c_str());
-			std::cout << _limit << std::endl;
         }
 	}
 	else if (modeSign == '-')
@@ -297,10 +303,7 @@ void Channel::modifMode(char modeSign, char modeChar, std::string *param)
 					return ;
 				std::map<std::string, Client*>::iterator it = _operators.find(param[i]);
 				if (it != _operators.end())
-				{
-					std::cout << "hello" << std::endl;
 					_operators.erase(it);
-				}
 				i++;
 			}
         }
